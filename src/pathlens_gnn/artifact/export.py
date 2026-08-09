@@ -162,7 +162,7 @@ def export_inference_artifact(
         "research_results_pending_final_sealed_test": True,
     }
     (output / "evaluation_summary.json").write_text(
-        json.dumps(evaluation_summary, indent=2), encoding="utf-8"
+        json.dumps(evaluation_summary, indent=2), encoding="utf-8", newline="\n"
     )
     (output / "model_card.md").write_text(
         "# PathLens-GNN Model Card\n\n"
@@ -170,6 +170,7 @@ def export_inference_artifact(
         "probabilities or validated interactions. Unknown non-edges may include "
         "undiscovered positives.\n",
         encoding="utf-8",
+        newline="\n",
     )
     manifest = _write_manifest(
         output,
@@ -385,6 +386,8 @@ def _write_manifest(
         "files": {relative: sha256_file(output / relative) for relative in payloads},
     }
     (output / "manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
+        json.dumps(manifest, indent=2, sort_keys=True),
+        encoding="utf-8",
+        newline="\n",
     )
     return manifest

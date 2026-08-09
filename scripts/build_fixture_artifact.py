@@ -52,10 +52,12 @@ def main() -> None:
             indent=2,
         ),
         encoding="utf-8",
+        newline="\n",
     )
     (ROOT / "model_card.md").write_text(
         "# Fixture Model Card\n\nSynthetic artifact for API/UI tests only.\n",
         encoding="utf-8",
+        newline="\n",
     )
     write_manifest(num_drugs, num_proteins, embedding_dim)
 
@@ -196,7 +198,9 @@ def write_manifest(num_drugs: int, num_proteins: int, embedding_dim: int) -> Non
         "files": {relative: sha256_file(ROOT / relative) for relative in payloads},
     }
     (ROOT / "manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
+        json.dumps(manifest, indent=2, sort_keys=True),
+        encoding="utf-8",
+        newline="\n",
     )
 
 
