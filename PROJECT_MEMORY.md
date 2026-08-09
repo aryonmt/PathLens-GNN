@@ -28,10 +28,13 @@ Last updated: 2026-08-09 (Asia/Tehran)
 
 - Active local branch: `planning`.
 - `main` exists at the initial planning commit.
-- `origin` will be configured to `aryonmt/PathLens-GNN` immediately before the authorized push.
+- `origin` is `https://github.com/aryonmt/PathLens-GNN.git`; `main` and `planning` are pushed.
 - `legacy/` contains the preserved original repository and nested Git history and must not be modified or committed.
 - Canonical data, model, artifact export, API, React 3D UI, Docker, CI, and Kaggle workflow are implemented.
 - Registered Kaggle training and the sealed final test have not yet run; no research result is claimed.
+- GitHub App reads the public repository but returns 403 for PR/Issue writes; the browser submission
+  also hit an intermittent network failure. `docs/delivery/ISSUE_BACKLOG.yaml` preserves the exact
+  board payload for the next authorized GitHub write attempt.
 
 ## Immediate implementation order
 

@@ -22,6 +22,9 @@ M1 Validated Research Foundation; M2 Model and Artifact Freeze; M3 Inference Pro
 
 Four epics contain the dependency-ordered child issues defined in `docs/decisions/PROJECT_CHARTER.md`: research foundation, path-aware model, inference product, and release. Each implementation Issue must include purpose, dependencies, acceptance checks, test evidence, priority, track, estimate, and risk.
 
+`ISSUE_BACKLOG.yaml` is the machine-readable source of truth used to recreate the board without
+losing dependencies or custom-field values when GitHub automation is unavailable.
+
 ## Branch and PR policy
 
 Use `issue-<number>-<slug>` from `main`, stage explicit paths, open a draft PR, link the Issue, run CI, then squash merge. `planning` changes enter `main` through one planning PR.
