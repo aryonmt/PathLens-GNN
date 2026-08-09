@@ -1,0 +1,33 @@
+name: Implementation work
+description: Dependency-tracked PathLens-GNN implementation issue
+title: "[Track] "
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Required outcome
+      description: Describe the observable result, not only the code change.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Link blocking Issues or write "None".
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance checks
+      description: List objective checks that must pass before Done.
+      placeholder: "- [ ] Test or artifact proves the outcome"
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk
+      options: [Low, Medium, High]
+    validations:
+      required: true
