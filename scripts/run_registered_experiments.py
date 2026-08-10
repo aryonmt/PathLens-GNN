@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
-import sys
 from pathlib import Path
+from typing import Any
 
 import yaml
+
+from pathlens_gnn.evaluation.heuristics import evaluate_heuristics
+from pathlens_gnn.model.pathlens import PathLensConfig
+from pathlens_gnn.training.runner import TrainingConfig, train_experiment
 
 
 def main() -> None:
@@ -16,40 +19,23 @@ def main() -> None:
         "--registry", type=Path, default=Path("configs/experiments/registered.yaml")
     )
     args = parser.parse_args()
-    registry = yaml.safe_load(args.registry.read_text(encoding="utf-8"))
+    registry: dict[str, Any] = yaml.safe_load(args.registry.read_text(encoding="utf-8"))
     args.output.mkdir(parents=True, exist_ok=True)
     heuristics_output = args.output / "heuristics.json"
     if not heuristics_output.exists():
-        subprocess.run(
-            [
-                sys.executable,
-                "scripts/evaluate_heuristics.py",
-                "--processed",
-                str(args.processed),
-                "--output",
-                str(heuristics_output),
-            ],
-            check=True,
-        )
+        evaluate_heuristics(args.processed, heuristics_output)
     for experiment in registry["models"]:
         experiment_output = args.output / experiment["name"]
         if (experiment_output / "metrics.json").exists() and (
             experiment_output / "checkpoint.pt"
         ).exists():
             continue
-        subprocess.run(
-            [
-                sys.executable,
-                "scripts/train.py",
-                "--processed",
-                str(args.processed),
-                "--output",
-                str(experiment_output),
-                "--config",
-                experiment["config"],
-            ],
-            check=True,
+        raw_config: dict[str, Any] = yaml.safe_load(
+            Path(experiment["config"]).read_text(encoding="utf-8")
         )
+        model_config = PathLensConfig(**raw_config.pop("model"))
+        training_config = TrainingConfig(model=model_config, **raw_config)
+        train_experiment(args.processed, experiment_output, training_config)
 
 
 if __name__ == "__main__":
