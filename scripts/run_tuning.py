@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import itertools
 import json
 import random
@@ -13,6 +12,13 @@ import yaml
 
 from pathlens_gnn.model.pathlens import PathLensConfig
 from pathlens_gnn.training.runner import TrainingConfig, train_experiment
+from pathlens_gnn.training.tuning_state import (
+    load_state,
+    sha256_file,
+    validate_state,
+    write_json,
+    write_state,
+)
 
 
 def main() -> None:
@@ -37,9 +43,9 @@ def main() -> None:
     max_trials = int(spec["budget"]["max_trials"])
     max_wall_seconds = int(spec["budget"]["max_wall_seconds"])
     state_path = args.output / "run_state.json"
-    state = _load_state(state_path)
-    search_space_sha256 = _sha256(args.search_space)
-    _validate_state(state, search_space_sha256, max_trials, max_wall_seconds)
+    state = load_state(state_path)
+    search_space_sha256 = sha256_file(args.search_space)
+    validate_state(state, search_space_sha256, max_trials, max_wall_seconds)
     previous_elapsed = float(state.get("active_elapsed_seconds", 0.0))
     invocation_started = time.monotonic()
     leaderboard: list[dict[str, Any]] = []
@@ -84,8 +90,8 @@ def main() -> None:
                 }
             )
             leaderboard.sort(key=lambda item: item["validation_hard_auprc"], reverse=True)
-            _write_json(args.output / "leaderboard.json", leaderboard)
-            _write_state(
+            write_json(args.output / "leaderboard.json", leaderboard)
+            write_state(
                 state_path,
                 search_space_sha256=search_space_sha256,
                 max_trials=max_trials,
@@ -106,7 +112,7 @@ def main() -> None:
             if completed_trials >= max_trials or total_elapsed >= max_wall_seconds
             else "paused"
         )
-        _write_state(
+        write_state(
             state_path,
             search_space_sha256=search_space_sha256,
             max_trials=max_trials,
@@ -126,67 +132,6 @@ def _registered_trials(spec: dict[str, Any]) -> list[dict[str, Any]]:
     ]
     random.Random(spec["seed"]).shuffle(combinations)
     return combinations
-
-
-def _load_state(path: Path) -> dict[str, Any]:
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _validate_state(
-    state: dict[str, Any], search_space_sha256: str, max_trials: int, max_wall_seconds: int
-) -> None:
-    if not state:
-        return
-    registered = (
-        state.get("search_space_sha256"),
-        state.get("max_trials"),
-        state.get("max_wall_seconds"),
-    )
-    current = (search_space_sha256, max_trials, max_wall_seconds)
-    if registered != current:
-        raise SystemExit(
-            "Refusing to resume tuning with a changed registered budget or search space"
-        )
-
-
-def _write_state(
-    path: Path,
-    *,
-    search_space_sha256: str,
-    max_trials: int,
-    max_wall_seconds: int,
-    active_elapsed_seconds: float,
-    completed_trials: int,
-    status: str,
-) -> None:
-    _write_json(
-        path,
-        {
-            "schema_version": "1.0",
-            "search_space_sha256": search_space_sha256,
-            "max_trials": max_trials,
-            "max_wall_seconds": max_wall_seconds,
-            "active_elapsed_seconds": active_elapsed_seconds,
-            "completed_trials": completed_trials,
-            "status": status,
-        },
-    )
-
-
-def _write_json(path: Path, payload: Any) -> None:
-    temporary = path.with_suffix(f"{path.suffix}.tmp")
-    temporary.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    temporary.replace(path)
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        while chunk := handle.read(1024 * 1024):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 if __name__ == "__main__":

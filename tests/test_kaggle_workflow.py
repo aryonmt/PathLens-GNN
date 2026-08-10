@@ -10,7 +10,7 @@ from pathlens_gnn.training.kaggle import (
     authorize_final_evaluation,
     restore_output_archive,
 )
-from scripts.run_tuning import _load_state, _validate_state, _write_state
+from pathlens_gnn.training.tuning_state import load_state, validate_state, write_state
 
 
 def test_committed_notebook_is_safe_to_run_all() -> None:
@@ -63,7 +63,7 @@ def test_final_evaluation_requires_token_and_is_one_time(tmp_path: Path) -> None
 
 def test_tuning_state_round_trips_and_binds_registered_budget(tmp_path: Path) -> None:
     state_path = tmp_path / "run_state.json"
-    _write_state(
+    write_state(
         state_path,
         search_space_sha256="registered-hash",
         max_trials=24,
@@ -72,10 +72,10 @@ def test_tuning_state_round_trips_and_binds_registered_budget(tmp_path: Path) ->
         completed_trials=3,
         status="paused",
     )
-    state = _load_state(state_path)
+    state = load_state(state_path)
     assert state["active_elapsed_seconds"] == 16.5
     assert state["completed_trials"] == 3
-    _validate_state(state, "registered-hash", 24, 345600)
+    validate_state(state, "registered-hash", 24, 345600)
 
-    with pytest.raises(SystemExit, match="changed registered budget or search space"):
-        _validate_state(state, "different-hash", 24, 345600)
+    with pytest.raises(ValueError, match="changed registered budget or search space"):
+        validate_state(state, "different-hash", 24, 345600)
