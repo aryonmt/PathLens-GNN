@@ -53,6 +53,11 @@ def train_experiment(
     context = arrays["context"].astype(np.int64)
     graph_index = BipartiteIndex(num_drugs, num_proteins, context)
     device = _resolve_device(config.device)
+    print(
+        f"[train] seed={config.seed} device={device} "
+        f"max_epochs={config.max_epochs} patience={config.patience}",
+        flush=True,
+    )
 
     edge_index = torch.as_tensor(context.T, dtype=torch.long, device=device)
     model = PathLensGNN(num_drugs, num_proteins, edge_index, config.model).to(device)
@@ -61,6 +66,7 @@ def train_experiment(
     )
     criterion = nn.BCEWithLogitsLoss()
 
+    preprocessing_start = time.perf_counter()
     train_pairs, train_labels, train_features = _build_candidates(
         arrays["train_positive"], arrays["train_uniform"], graph_index
     )
@@ -70,6 +76,12 @@ def train_experiment(
     train_tensors = _to_tensors(train_pairs, train_labels, train_features, device)
     validation_tensors = _to_tensors(
         validation_pairs, validation_labels, validation_features, device
+    )
+    print(
+        f"[train] Prepared {len(train_pairs)} train and {len(validation_pairs)} "
+        f"validation pairs on CPU in {time.perf_counter() - preprocessing_start:.1f}s; "
+        f"training tensors moved to {device}",
+        flush=True,
     )
 
     best_auprc = float("-inf")
@@ -108,7 +120,15 @@ def train_experiment(
             stale_epochs = 0
         else:
             stale_epochs += 1
+        if epoch == 0 or (epoch + 1) % 10 == 0:
+            print(
+                f"[train] epoch={epoch + 1}/{config.max_epochs} "
+                f"loss={loss.item():.4f} validation_hard_auprc={report.auprc:.4f} "
+                f"best={best_auprc:.4f} stale={stale_epochs}/{config.patience}",
+                flush=True,
+            )
         if stale_epochs >= config.patience:
+            print(f"[train] Early stopping at epoch {epoch + 1}", flush=True)
             break
 
     if best_state is None:
@@ -134,6 +154,11 @@ def train_experiment(
     }
     (output / "metrics.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     (output / "history.json").write_text(json.dumps(history, indent=2), encoding="utf-8")
+    print(
+        f"[train] Completed {len(history)} epochs in {elapsed:.1f}s on {device}; "
+        f"best_epoch={best_epoch + 1} best_validation_hard_auprc={best_auprc:.4f}",
+        flush=True,
+    )
     return summary
 
 

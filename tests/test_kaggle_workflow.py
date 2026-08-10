@@ -40,6 +40,15 @@ def test_notebook_bootstraps_current_kernel_imports() -> None:
     assert "sys.path.insert(0, repository_source)" in checkout_source
 
 
+def test_notebook_streams_training_logs_from_current_kernel_python() -> None:
+    notebook = json.loads(Path("kaggle/pathlens_training.ipynb").read_text(encoding="utf-8"))
+    training_cell = next(cell for cell in notebook["cells"] if cell["id"] == "train-stage")
+    training_source = "".join(training_cell["source"])
+
+    assert training_source.count("sys.executable") == 3
+    assert training_source.count('"-u"') == 3
+
+
 def test_restore_output_archive_rejects_path_traversal(tmp_path: Path) -> None:
     archive = tmp_path / "unsafe.zip"
     with zipfile.ZipFile(archive, "w") as handle:
