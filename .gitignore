@@ -8,7 +8,7 @@ __pycache__/
 *.so
 .Python
 .pytest_cache/
-.pytest_tmp/
+.pytest_tmp*/
 .mypy_cache/
 .ruff_cache/
 .coverage
@@ -41,7 +41,7 @@ mlruns/
 # Downloaded and generated data (fixtures remain under tests/ or artifacts/fixtures/)
 data/raw/
 data/processed/
-.uv-cache/
+.uv-cache*/
 .pnpm-store/
 
 # Frontend

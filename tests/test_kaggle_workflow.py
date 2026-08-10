@@ -30,6 +30,25 @@ def test_committed_notebook_is_safe_to_run_all() -> None:
     assert "--confirm-sealed-test" in final_source
 
 
+def test_notebook_bootstraps_current_kernel_imports() -> None:
+    notebook = json.loads(Path("kaggle/pathlens_training.ipynb").read_text(encoding="utf-8"))
+    checkout_cell = next(cell for cell in notebook["cells"] if cell["id"] == "checkout")
+    checkout_source = "".join(checkout_cell["source"])
+
+    assert 'subprocess.run([sys.executable, "-m", "pip"' in checkout_source
+    assert 'repository_source = str(REPO / "src")' in checkout_source
+    assert "sys.path.insert(0, repository_source)" in checkout_source
+
+
+def test_notebook_streams_training_logs_from_current_kernel_python() -> None:
+    notebook = json.loads(Path("kaggle/pathlens_training.ipynb").read_text(encoding="utf-8"))
+    training_cell = next(cell for cell in notebook["cells"] if cell["id"] == "train-stage")
+    training_source = "".join(training_cell["source"])
+
+    assert training_source.count("sys.executable") == 3
+    assert training_source.count('"-u"') == 3
+
+
 def test_restore_output_archive_rejects_path_traversal(tmp_path: Path) -> None:
     archive = tmp_path / "unsafe.zip"
     with zipfile.ZipFile(archive, "w") as handle:
