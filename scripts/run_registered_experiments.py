@@ -18,18 +18,25 @@ def main() -> None:
     args = parser.parse_args()
     registry = yaml.safe_load(args.registry.read_text(encoding="utf-8"))
     args.output.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        [
-            sys.executable,
-            "scripts/evaluate_heuristics.py",
-            "--processed",
-            str(args.processed),
-            "--output",
-            str(args.output / "heuristics.json"),
-        ],
-        check=True,
-    )
+    heuristics_output = args.output / "heuristics.json"
+    if not heuristics_output.exists():
+        subprocess.run(
+            [
+                sys.executable,
+                "scripts/evaluate_heuristics.py",
+                "--processed",
+                str(args.processed),
+                "--output",
+                str(heuristics_output),
+            ],
+            check=True,
+        )
     for experiment in registry["models"]:
+        experiment_output = args.output / experiment["name"]
+        if (experiment_output / "metrics.json").exists() and (
+            experiment_output / "checkpoint.pt"
+        ).exists():
+            continue
         subprocess.run(
             [
                 sys.executable,
@@ -37,7 +44,7 @@ def main() -> None:
                 "--processed",
                 str(args.processed),
                 "--output",
-                str(args.output / experiment["name"]),
+                str(experiment_output),
                 "--config",
                 experiment["config"],
             ],

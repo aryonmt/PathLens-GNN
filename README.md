@@ -38,9 +38,9 @@ Open `http://localhost:5173`. For the portable presentation build, run
 
 Training is intentionally separated from local product development. Push this repository, import
 [`kaggle/pathlens_training.ipynb`](kaggle/pathlens_training.ipynb) into a GPU Kaggle notebook,
-and follow [`kaggle/README.md`](kaggle/README.md). The notebook clones the public repository,
-downloads the canonical BioSNAP source, prepares immutable splits, runs the registered budget, and
-exports a versioned inference artifact.
+and follow [`kaggle/README.md`](kaggle/README.md). The notebook defaults to a safe three-epoch
+smoke stage. Registered experiments, tuning, confirmation, model freeze, the one-time sealed test,
+and artifact export run as explicit resumable stages with versioned output ZIPs.
 
 ## Documentation
 
