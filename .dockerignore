@@ -1,0 +1,12 @@
+.git
+.venv
+.uv-cache
+legacy
+data
+runs
+checkpoints
+apps/web/node_modules
+apps/web/dist
+__pycache__
+.pytest_cache
+.pytest_tmp

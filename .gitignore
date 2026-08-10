@@ -8,6 +8,7 @@ __pycache__/
 *.so
 .Python
 .pytest_cache/
+.pytest_tmp/
 .mypy_cache/
 .ruff_cache/
 .coverage
@@ -25,7 +26,9 @@ env/
 .ipynb_checkpoints/
 
 # Model and experiment artifacts
-artifacts/
+artifacts/*
+!artifacts/fixtures/
+!artifacts/fixtures/**
 checkpoints/
 runs/
 wandb/
@@ -35,10 +38,19 @@ mlruns/
 *.ckpt
 *.onnx
 
+# Downloaded and generated data (fixtures remain under tests/ or artifacts/fixtures/)
+data/raw/
+data/processed/
+.uv-cache/
+.pnpm-store/
+
 # Frontend
 node_modules/
 .vite/
 coverage/
+*.tsbuildinfo
+apps/web/vite.config.js
+apps/web/vite.config.d.ts
 
 # Environment and secrets
 .env
@@ -51,4 +63,3 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
-

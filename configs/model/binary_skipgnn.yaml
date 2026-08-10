@@ -1,0 +1,15 @@
+seed: 13
+learning_rate: 0.001
+weight_decay: 0.0001
+max_epochs: 300
+patience: 30
+device: auto
+model:
+  embedding_dim: 64
+  branch_dim: 64
+  expert_hidden_dim: 64
+  gate_hidden_dim: 64
+  dropout: 0.2
+  s2_weighting: count
+  adaptive_gate: false
+  enabled_channels: [true, true, false]

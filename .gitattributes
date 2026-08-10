@@ -1,0 +1,2 @@
+artifacts/fixtures/**/*.json text eol=lf
+artifacts/fixtures/**/*.md text eol=lf

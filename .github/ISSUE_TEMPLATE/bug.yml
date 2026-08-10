@@ -1,0 +1,23 @@
+name: Bug report
+description: Reproducible scientific, product, or infrastructure defect
+title: "[Bug] "
+labels: ["type:bug"]
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction and evidence
+    validations:
+      required: true

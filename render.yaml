@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: pathlens-gnn-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.api
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PATHLENS_ARTIFACT_DIR
+        value: /app/artifacts/current
+      - key: PATHLENS_CORS_ORIGINS
+        sync: false

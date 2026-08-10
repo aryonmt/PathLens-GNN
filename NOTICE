@@ -1,0 +1,16 @@
+PathLens-GNN
+Copyright (c) 2026 Amirreza Nemati
+
+This project is a cleanly structured research extension of SkipGNN:
+
+  SkipGNN: Predicting Molecular Interactions with Skip-Graph Networks
+  Copyright (c) 2020 Kexin Huang
+  https://github.com/kexinhuang12345/SkipGNN
+
+The archived upstream code remains subject to its BSD-3-Clause license. Any
+source reused from that project must retain its original copyright notice.
+
+The primary DTI graph is distributed by the Stanford SNAP BioSNAP collection
+and is derived from DrugBank/MINER. Dataset files and metadata are not covered
+by the PathLens-GNN code license. Users must follow the terms of the original
+data providers and cite the sources documented in `docs/research/LITERATURE_REVIEW.md`.

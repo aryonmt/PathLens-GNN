@@ -1,0 +1,37 @@
+{
+  "created_at": "2026-08-09T18:37:28.490307+00:00",
+  "dataset_version": "fixture-dti-v1",
+  "dimensions": {
+    "embedding_dim": 4,
+    "num_drugs": 3,
+    "num_proteins": 3
+  },
+  "files": {
+    "embeddings/s1.npy": "ee0250d33b532a5c560692da169ba95e0fb525ff8fd3da043b985705c5ae20df",
+    "embeddings/s2.npy": "1a92c04f2c89db05fcb0831804968315880fe14efb2d42ab818fb20ccd2fb359",
+    "embeddings/s3.npy": "9f03ef3520ec807b3c0f3a8c03e7b5c3e0ef7036f0098e4abd5922169ae3ce64",
+    "evaluation_summary.json": "1111e7ddb1b5bb541f288b30765e59277980433c7073b3b496ec8bcba4b43288",
+    "graph/context_edges.npy": "7307625907b725cc7f28b288038ed7f511dfc241beb06b549d80bf906bdbc956",
+    "graph/known_edges.npy": "7307625907b725cc7f28b288038ed7f511dfc241beb06b549d80bf906bdbc956",
+    "model_card.md": "9b2a906dcb5246979a30a9bf56d4d01437d03d011eb26630da5aace25e6090ae",
+    "model_weights.npz": "ee1fddc9fba459c2ad5740eecdf347fbd1c3f1fdde736b51fc5dc35e6b60b106",
+    "pathlens.db": "82e25df730e29bba4d53fa686feec860d5d5d9a8c6f2ee4d914dd00b0f637100"
+  },
+  "limitations": [
+    "Synthetic data",
+    "Not a research result",
+    "Not clinical"
+  ],
+  "model": {
+    "enabled_channels": [
+      true,
+      true,
+      true
+    ],
+    "gelu": "tanh"
+  },
+  "model_version": "fixture-v1",
+  "name": "PathLens-GNN Fixture",
+  "schema_version": "1.0.0",
+  "summary": "Synthetic artifact for contract and visualization tests."
+}

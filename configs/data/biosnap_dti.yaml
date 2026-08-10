@@ -1,0 +1,20 @@
+dataset_version: biosnap-dti-canonical-v1
+seed: 13
+split:
+  context: 0.60
+  train: 0.20
+  validation: 0.10
+  test: 0.10
+negatives:
+  train: uniform
+  ratio: 1.0
+  evaluation:
+    - uniform
+    - degree_matched
+  degree_quantiles: 4
+source:
+  url: https://snap.stanford.edu/biodata/datasets/10002/files/ChG-Miner_miner-chem-gene.tsv.gz
+  expected_edges: 15138
+  expected_drugs: 5017
+  expected_proteins: 2324
+  expected_entities: 7341

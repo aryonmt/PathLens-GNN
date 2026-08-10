@@ -1,0 +1,14 @@
+heuristics:
+  - degree_type_shortcut
+  - normalized_three_hop
+models:
+  - name: one_hop
+    config: configs/model/one_hop.yaml
+  - name: binary_skipgnn
+    config: configs/model/binary_skipgnn.yaml
+  - name: s1_s2_weighted
+    config: configs/model/s1_s2_weighted.yaml
+  - name: s1_s2_s3_fixed
+    config: configs/model/s1_s2_s3_fixed.yaml
+  - name: full_adaptive_fusion
+    config: configs/model/pathlens_full.yaml

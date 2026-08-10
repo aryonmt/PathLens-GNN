@@ -1,0 +1,17 @@
+budget:
+  max_trials: 24
+  max_wall_seconds: 345600
+  selection_metric: validation_hard_auprc
+seed: 13
+search:
+  embedding_dim: [64, 128]
+  dropout: [0.1, 0.3]
+  learning_rate: [0.0003, 0.001]
+  weight_decay: [0.0, 0.0001]
+  s2_weighting: [resource_allocation, count]
+  gate_hidden_dim: [64, 128]
+fixed:
+  branch_dim: 64
+  expert_hidden_dim: 64
+  max_epochs: 300
+  patience: 30
