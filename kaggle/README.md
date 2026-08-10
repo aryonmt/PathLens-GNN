@@ -10,7 +10,7 @@ Kaggle is the authoritative environment for PyTorch smoke training, registered t
 
 ## Flow
 
-1. Clone the explicit `planning` ref until its PR is merged; then pin `main` or a release tag.
+1. Clone the explicit `main` ref; pin a release tag once the first validated artifact is published.
 2. Install the repository editable with `--no-deps`; Kaggle's existing PyTorch/NumPy/SciPy stack is preferred.
 3. Download or attach the BioSNAP TSV and run `pathlens prepare-data`.
 4. Run a short smoke configuration before the registered search.
