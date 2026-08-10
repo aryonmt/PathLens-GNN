@@ -26,19 +26,17 @@ Last updated: 2026-08-09 (Asia/Tehran)
 
 ## Repository state
 
-- Active local branch: `planning`.
-- `main` exists at the initial planning commit.
-- `origin` is `https://github.com/aryonmt/PathLens-GNN.git`; `main` and `planning` are pushed.
+- PR #1 was squash-merged as commit `673e0c0`; `main` is the authoritative implementation branch.
+- Active local branch: `fix/kaggle-main-ref`, created from the merged `main`.
+- `origin` is `https://github.com/aryonmt/PathLens-GNN.git`.
 - `legacy/` contains the preserved original repository and nested Git history and must not be modified or committed.
 - Canonical data, model, artifact export, API, React 3D UI, Docker, CI, and Kaggle workflow are implemented.
 - Registered Kaggle training and the sealed final test have not yet run; no research result is claimed.
-- GitHub App reads the public repository but returns 403 for PR/Issue writes; the browser submission
-  also hit an intermittent network failure. `docs/delivery/ISSUE_BACKLOG.yaml` preserves the exact
-  board payload for the next authorized GitHub write attempt.
+- `docs/delivery/ISSUE_BACKLOG.yaml` preserves the exact board payload for future GitHub Issues.
 
 ## Immediate implementation order
 
-Push planning implementation -> run Kaggle smoke/tuning -> record freeze -> run sealed evaluation -> publish artifact -> deploy public demo.
+Run Kaggle smoke/tuning -> record freeze -> run sealed evaluation -> publish artifact -> deploy public demo.
 
 ## Non-negotiable scientific language
 
