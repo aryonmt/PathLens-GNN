@@ -1,2 +1,7 @@
-artifacts/fixtures/**/*.json text eol=lf
-artifacts/fixtures/**/*.md text eol=lf
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.ipynb text eol=lf

@@ -22,7 +22,9 @@ def test_committed_notebook_is_safe_to_run_all() -> None:
         compile("".join(cell["source"]), f"notebook:{cell['id']}", "exec")
 
     parameters = next(cell for cell in code_cells if cell["id"] == "parameters")
-    assert 'STAGE = "smoke"' in "".join(parameters["source"])
+    parameters_source = "".join(parameters["source"])
+    assert 'STAGE = "smoke"' in parameters_source
+    assert "export" not in parameters_source
     final_stage = next(cell for cell in code_cells if cell["id"] == "final-stage")
     final_source = "".join(final_stage["source"])
     assert 'if STAGE == "final"' in final_source

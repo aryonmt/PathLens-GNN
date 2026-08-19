@@ -17,18 +17,17 @@ build/
 dist/
 *.egg-info/
 
-# Virtual environments
+# Virtual environments and installer caches
 .venv/
 venv/
 env/
+.uv-cache*/
 
 # Notebooks
 .ipynb_checkpoints/
 
-# Model and experiment artifacts
-artifacts/*
-!artifacts/fixtures/
-!artifacts/fixtures/**
+# Local experiment outputs (never commit)
+outputs/
 checkpoints/
 runs/
 wandb/
@@ -38,28 +37,22 @@ mlruns/
 *.ckpt
 *.onnx
 
-# Downloaded and generated data (fixtures remain under tests/ or artifacts/fixtures/)
+# Downloaded and generated data
 data/raw/
 data/processed/
-.uv-cache*/
-.pnpm-store/
-
-# Frontend
-node_modules/
-.vite/
-coverage/
-*.tsbuildinfo
-apps/web/vite.config.js
-apps/web/vite.config.d.ts
 
 # Environment and secrets
 .env
 .env.*
-!.env.example
 
-# Editors and operating systems
+# Editors, OS, and leftover local tooling
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
 desktop.ini
+node_modules/
+.pnpm-store/
+.vite/
+coverage/
+*.tsbuildinfo

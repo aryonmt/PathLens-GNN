@@ -5,27 +5,22 @@ build-backend = "hatchling.build"
 [project]
 name = "pathlens-gnn"
 version = "0.1.0"
-description = "Leakage-aware path-aware graph learning and inference for drug-target interaction prioritization"
+description = "Leakage-aware path-aware graph learning for transductive drug-target interaction ranking"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = { file = "LICENSE" }
 authors = [{ name = "Amirreza Nemati" }]
 dependencies = [
-  "fastapi>=0.116,<1",
   "numpy>=2.0,<3",
-  "pydantic>=2.11,<3",
-  "pydantic-settings>=2.10,<3",
   "pyyaml>=6,<7",
   "scikit-learn>=1.6,<2",
   "scipy>=1.15,<2",
   "typer>=0.16,<1",
-  "uvicorn[standard]>=0.35,<1",
 ]
 
 [project.optional-dependencies]
 train = ["torch>=2.7,<3"]
 dev = [
-  "httpx>=0.28,<1",
   "mypy>=1.17,<2",
   "pytest>=8.4,<9",
   "pytest-cov>=6.2,<7",
@@ -61,9 +56,6 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = ["sklearn.*"]
 ignore_missing_imports = true
-
-[tool.ruff.lint.per-file-ignores]
-"src/pathlens_gnn/api/app.py" = ["B008"]
 
 [tool.coverage.run]
 source = ["pathlens_gnn"]

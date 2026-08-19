@@ -31,8 +31,10 @@ def main() -> None:
     freeze = json.loads(args.freeze_record.read_text(encoding="utf-8"))
     if freeze.get("checkpoint_sha256") != _sha256(args.checkpoint):
         raise SystemExit("Freeze record does not match the selected checkpoint")
+    print("[final] Freeze record matched. Opening sealed test...", flush=True)
     result = evaluate(args.processed, args.checkpoint)
     result["freeze_record"] = freeze
+    print("[final] Sealed evaluation finished.", flush=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps(result, indent=2))
@@ -56,10 +58,12 @@ def evaluate(processed: Path, checkpoint_path: Path) -> dict[str, Any]:
     ).to(device)
     model.load_state_dict(checkpoint["state_dict"])
     model.eval()
+    print(f"[final] device={device} seed={checkpoint['training_config']['seed']}", flush=True)
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
     with torch.inference_mode():
         embeddings = model.encode()
+    print("[final] Encoded graph; scoring validation for threshold...", flush=True)
 
     projection_drug = np.asarray(
         [graph.projection_mass_drug(index) for index in range(num_drugs)], dtype=np.float32
@@ -94,8 +98,10 @@ def evaluate(processed: Path, checkpoint_path: Path) -> dict[str, Any]:
     )
     validation_logits = score_pairs(validation_pairs)
     threshold = select_f1_threshold(validation_labels, sigmoid(validation_logits))
+    print(f"[final] Validation-selected F1 threshold={threshold:.4f}", flush=True)
     reports: dict[str, Any] = {}
     for negative_name in ("test_uniform", "test_hard"):
+        print(f"[final] Scoring {negative_name}...", flush=True)
         pairs, labels = _candidates(arrays["test_positive"], arrays[negative_name])
         logits = score_pairs(pairs)
         report = classification_report(labels, logits, threshold=threshold)
@@ -110,6 +116,11 @@ def evaluate(processed: Path, checkpoint_path: Path) -> dict[str, Any]:
         known_by_drug[drug] = frozenset(
             int(protein) for source, protein in arrays["all_positive"] if int(source) == drug
         )
+    print(
+        "[final] Starting filtered ranking over all proteins per eligible drug; "
+        "this step has no epoch logs and can take a long time.",
+        flush=True,
+    )
     ranking_started = time.perf_counter()
     ranking = filtered_per_drug_ranking(
         arrays["test_positive"],

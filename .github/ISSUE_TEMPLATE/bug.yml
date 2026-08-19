@@ -1,5 +1,5 @@
 name: Bug report
-description: Reproducible scientific, product, or infrastructure defect
+description: Reproducible scientific or infrastructure defect
 title: "[Bug] "
 labels: ["type:bug"]
 body:

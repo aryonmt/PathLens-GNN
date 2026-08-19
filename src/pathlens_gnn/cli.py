@@ -8,7 +8,7 @@ import typer
 
 from pathlens_gnn.data.prepare import prepare_biosnap_dataset
 
-app = typer.Typer(help="PathLens-GNN research and inference utilities.")
+app = typer.Typer(help="PathLens-GNN research utilities.")
 
 
 @app.command("prepare-data")

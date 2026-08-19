@@ -14,4 +14,4 @@ Protein labels may be enriched through the public UniProt REST services. Drug la
 
 ## Positioning
 
-PathLens-GNN does not claim publication-level novelty before experiments. Its defensible contribution is the combined leakage-safe benchmark, sparse hop-separated architecture, pre-registered ablations, and faithful product evidence contract.
+PathLens-GNN does not claim publication-level novelty before experiments. Its defensible contribution is the combined leakage-safe benchmark, sparse hop-separated architecture, and pre-registered ablations.

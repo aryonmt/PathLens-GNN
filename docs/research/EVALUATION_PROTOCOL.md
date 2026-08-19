@@ -29,7 +29,7 @@ Tuning ends after 24 configurations or four wall-clock days. The search covers e
 - AUROC/AUPRC on uniform and degree-matched unknowns.
 - Validation-selected F1, Brier score, and expected calibration error.
 - Exact filtered MRR and Hits@10/50 against all proteins per eligible drug.
-- Degree quartile slices, training time, peak memory, artifact latency.
+- Degree quartile slices, training time, peak memory, and inference latency.
 - Mean and sample standard deviation across seeds and stratified bootstrap intervals.
 
 Sampled-nonedge metrics and ranking metrics must be named separately. A sigmoid is not labelled as biological interaction probability.

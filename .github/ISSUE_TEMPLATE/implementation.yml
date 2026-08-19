@@ -1,12 +1,12 @@
 name: Implementation work
-description: Dependency-tracked PathLens-GNN implementation issue
+description: PathLens-GNN research implementation issue
 title: "[Track] "
 body:
   - type: textarea
     id: outcome
     attributes:
       label: Required outcome
-      description: Describe the observable result, not only the code change.
+      description: Describe the observable research or engineering result, not only the code change.
     validations:
       required: true
   - type: textarea
@@ -21,7 +21,7 @@ body:
     attributes:
       label: Acceptance checks
       description: List objective checks that must pass before Done.
-      placeholder: "- [ ] Test or artifact proves the outcome"
+      placeholder: "- [ ] Test or evaluation artifact proves the outcome"
     validations:
       required: true
   - type: dropdown

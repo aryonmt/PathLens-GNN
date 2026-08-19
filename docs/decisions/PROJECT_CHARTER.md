@@ -2,27 +2,33 @@
 
 ## Objective
 
-Deliver a scientifically defensible extension of SkipGNN and a polished inference-only application that ranks unrecorded interactions among drugs and proteins already represented in the BioSNAP DTI graph.
+Deliver a scientifically defensible extension of SkipGNN for transductive
+drug–target interaction ranking on canonical BioSNAP. The work is a research
+benchmark and model study, not a product or clinical application.
 
 ## Audiences
 
-- University reviewers evaluating scientific method and engineering depth.
-- Researchers exploring candidates for follow-up, with no clinical interpretation.
-- Portfolio reviewers evaluating reproducibility, API design, visualization, and deployment.
+- University reviewers evaluating scientific method and reproducibility.
+- Researchers exploring ranked candidates for follow-up, with no clinical interpretation.
 
 ## Required outcomes
 
 1. A canonical typed dataset and leakage-safe benchmark.
 2. Faithful structural and SkipGNN baselines.
-3. A sparse path-aware model with controlled ablations and explanations.
-4. Versioned, provenance-carrying inference artifacts.
-5. Search, Top-K prioritization, pair evidence, export, and focused/ego 3D views.
-6. Local Docker Compose and a best-effort public portfolio deployment.
+3. A sparse path-aware model with controlled ablations.
+4. Preregistered tuning, multi-seed confirmation, freeze, and a one-time sealed test.
+5. Honest reporting when an ablation or heuristic beats the adaptive model.
 
-## Out of scope for v1
+## Out of scope
 
-Cold-start molecules/proteins, user training, uploads, authentication, clinical claims, a mutable production database, global full-graph rendering, and guaranteed uncertainty estimates.
+Product UI, inference APIs, deployment, cold-start molecules or proteins, user
+training, uploads, authentication, clinical claims, a mutable production
+database, global full-graph rendering, and guaranteed uncertainty estimates.
 
 ## Success policy
 
-The best validation-selected model is deployed. If the adaptive model does not beat an ablation after the registered tuning budget, the negative result is reported and the strongest valid ablation becomes the production model.
+Model selection uses validation hard-negative AUPRC, with filtered MRR as the
+tie-break. If the adaptive model does not beat a registered ablation or
+heuristic after the registered budget, the negative result is reported and the
+strongest valid candidate is frozen. After the sealed test is opened, that split
+is never reused for selection.
