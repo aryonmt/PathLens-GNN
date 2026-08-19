@@ -32,6 +32,9 @@ def test_committed_notebook_is_safe_to_run_all() -> None:
     assert "--confirm-sealed-test" in final_source
     data_source = "".join(next(cell for cell in code_cells if cell["id"] == "data")["source"])
     assert "prepare-data" in data_source
+    assert 'sys.executable' in data_source
+    assert '"-m"' in data_source
+    assert "pathlens_gnn" in data_source
     assert '"41"' in data_source
     assert "biosnap-dti-canonical-v2" in data_source
 

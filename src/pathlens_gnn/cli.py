@@ -6,10 +6,17 @@ from typing import Annotated
 
 import typer
 
+from pathlens_gnn import __version__
 from pathlens_gnn.constants import DEFAULT_SPLIT_SEED
 from pathlens_gnn.data.prepare import prepare_biosnap_dataset
 
-app = typer.Typer(help="PathLens-GNN research utilities.")
+app = typer.Typer(help="PathLens-GNN research utilities.", no_args_is_help=True)
+
+
+@app.command("version")
+def version() -> None:
+    """Print the installed PathLens-GNN version."""
+    typer.echo(__version__)
 
 
 @app.command("prepare-data")
