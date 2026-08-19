@@ -4,6 +4,9 @@ Kaggle is the authoritative GPU environment for smoke training, registered
 experiments, tuning, multi-seed confirmation, freeze, and the one-time sealed
 evaluation. Local development does not require a CUDA installation.
 
+Campaign `biosnap-dti-canonical-v2` uses split seed 41. Do not restore a v1
+processed dataset or a v1 stage ZIP into this campaign.
+
 ## Kernel settings
 
 - Accelerator: GPU (P100, T4, or the current available GPU)

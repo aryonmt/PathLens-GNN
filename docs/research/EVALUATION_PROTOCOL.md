@@ -11,18 +11,20 @@ Assertions:
 - every pair is drug-to-protein;
 - pseudo-entities, duplicates, and malformed IDs are absent.
 
+Campaign `biosnap-dti-canonical-v1` used split seed 13. Its sealed test is opened and frozen. Campaign `biosnap-dti-canonical-v2` uses the same canonicalizer and split seed 41. Do not mix processed arrays across campaigns, and do not use the v1 test report for selection.
+
 ## Negative sets
 
-- Fixed 1:1 uniform typed unknowns for optimization and sampled evaluation.
-- Fixed degree-matched hard unknowns from four context-degree quantiles.
-- Exclude every known positive from every pool.
+- Evaluation still uses fixed 1:1 uniform typed unknowns and degree-matched hard unknowns.
+- Ranking-loss training samples 64 typed non-edges per positive each epoch, with a 25% degree-quantile hard mix. These training negatives are not the evaluation sets.
+- Exclude every known positive from every negative pool.
 - Record deterministic fallbacks when a degree stratum is exhausted.
 
 ## Model selection
 
-Primary: validation hard-negative AUPRC. Tie-break: exact filtered per-drug MRR. Test remains sealed until the complete selection procedure finishes.
+For the ranking-loss campaign: primary validation filtered per-drug MRR, with validation hard-negative AUPRC as the tie-break. Freeze only if the selected model also beats the normalized three-hop heuristic and the binary SkipGNN reimplementation on both metrics. Test remains sealed until freeze.
 
-Tuning ends after 24 configurations or four wall-clock days. The search covers embedding dimension, dropout, learning rate, weight decay, S2 weighting, and gate width. Initial trials use seed 13; the two leading configurations are rerun on seeds 13, 29, and 71.
+Tuning ends after 24 configurations or four wall-clock days. The search covers embedding dimension, dropout, learning rate, weight decay, S2 weighting, and gate width. Ranking-loss hyperparameters stay fixed (`num_negatives=64`, `hard_negative_fraction=0.25`, `softmax_temperature=1.0`). Initial trials use training seed 13; the two leading configurations are rerun on seeds 13, 29, and 71.
 
 ## Reports
 

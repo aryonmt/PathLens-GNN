@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from pathlens_gnn.constants import DEFAULT_DATASET_VERSION, SCHEMA_VERSION
+from pathlens_gnn.constants import DEFAULT_DATASET_VERSION, DEFAULT_SPLIT_SEED, SCHEMA_VERSION
 from pathlens_gnn.data.canonical import load_biosnap_tsv
 from pathlens_gnn.data.negative import (
     sample_degree_matched_negatives,
@@ -20,7 +20,7 @@ def prepare_biosnap_dataset(
     source: str | Path,
     output_dir: str | Path,
     *,
-    seed: int = 13,
+    seed: int = DEFAULT_SPLIT_SEED,
 ) -> dict[str, object]:
     dataset = load_biosnap_tsv(source)
     split = coverage_preserving_split(dataset.edges, seed=seed)

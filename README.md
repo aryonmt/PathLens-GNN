@@ -13,8 +13,9 @@ The repository contains the canonical BioSNAP DTI pipeline, sparse three-channel
 model, registered baselines and ablations, and a staged Kaggle workflow
 (`smoke` → `registered` → `tuning` → `confirmation` → `freeze` → `final`).
 
-A validation-selected configuration is frozen. The corresponding sealed test was
-opened once and must not be used for further model selection on this split.
+A validation-selected configuration is frozen on campaign v1 (split seed 13).
+That sealed test was opened once and must not be used for further selection.
+Campaign v2 (split seed 41) is the current sealed ranking-loss campaign.
 
 The archived SkipGNN repository remains locally under `legacy/` and is
 intentionally excluded from Git.
@@ -31,7 +32,7 @@ uv run pytest
 Prepare the canonical dataset from a local BioSNAP TSV:
 
 ```bash
-uv run pathlens prepare-data --source path/to/ChG-Miner_miner-chem-gene.tsv
+uv run pathlens prepare-data --source path/to/ChG-Miner_miner-chem-gene.tsv --seed 41
 ```
 
 Training and the sealed evaluation run on Kaggle. See

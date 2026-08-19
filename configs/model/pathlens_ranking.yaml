@@ -1,11 +1,11 @@
 seed: 13
 learning_rate: 0.0003
 weight_decay: 0.0001
-max_epochs: 3
-patience: 2
+max_epochs: 300
+patience: 30
 device: auto
 loss: sampled_softmax
-num_negatives: 8
+num_negatives: 64
 hard_negative_fraction: 0.25
 softmax_temperature: 1.0
 model:

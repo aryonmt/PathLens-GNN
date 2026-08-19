@@ -10,8 +10,7 @@ from typing import Any
 
 import yaml
 
-from pathlens_gnn.model.pathlens import PathLensConfig
-from pathlens_gnn.training.runner import TrainingConfig, train_experiment
+from pathlens_gnn.training.runner import train_experiment, training_config_from_trial
 from pathlens_gnn.training.tuning_state import (
     load_state,
     sha256_file,
@@ -64,32 +63,18 @@ def main() -> None:
             if metrics_path.exists() and checkpoint_path.exists():
                 metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
             else:
-                model = PathLensConfig(
-                    embedding_dim=parameters["embedding_dim"],
-                    branch_dim=spec["fixed"]["branch_dim"],
-                    expert_hidden_dim=spec["fixed"]["expert_hidden_dim"],
-                    gate_hidden_dim=parameters["gate_hidden_dim"],
-                    dropout=parameters["dropout"],
-                    s2_weighting=parameters["s2_weighting"],
-                )
-                config = TrainingConfig(
-                    seed=spec["seed"],
-                    learning_rate=parameters["learning_rate"],
-                    weight_decay=parameters["weight_decay"],
-                    max_epochs=spec["fixed"]["max_epochs"],
-                    patience=spec["fixed"]["patience"],
-                    model=model,
-                )
+                config = training_config_from_trial(spec, parameters, seed=spec["seed"])
                 metrics = train_experiment(args.processed, trial_dir, config)
-            leaderboard.append(
-                {
-                    "trial": trial_index,
-                    "parameters": parameters,
-                    "validation_hard_auprc": metrics["validation_hard_auprc"],
-                    "checkpoint": str(checkpoint_path),
-                }
-            )
-            leaderboard.sort(key=lambda item: item["validation_hard_auprc"], reverse=True)
+            entry = {
+                "trial": trial_index,
+                "parameters": parameters,
+                "validation_hard_auprc": metrics["validation_hard_auprc"],
+                "checkpoint": str(checkpoint_path),
+            }
+            if "validation_filtered_mrr" in metrics:
+                entry["validation_filtered_mrr"] = metrics["validation_filtered_mrr"]
+            leaderboard.append(entry)
+            leaderboard.sort(key=_leaderboard_key, reverse=True)
             write_json(args.output / "leaderboard.json", leaderboard)
             write_state(
                 state_path,
@@ -122,6 +107,10 @@ def main() -> None:
             status=status,
         )
     print(json.dumps(leaderboard[:5], indent=2))
+
+
+def _leaderboard_key(item: dict[str, Any]) -> tuple[float, float]:
+    return (float(item.get("validation_filtered_mrr", 0.0)), float(item["validation_hard_auprc"]))
 
 
 def _registered_trials(spec: dict[str, Any]) -> list[dict[str, Any]]:

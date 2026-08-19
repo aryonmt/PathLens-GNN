@@ -19,8 +19,8 @@ def main() -> None:
         "schema_version": "1.0",
         "checkpoint": str(args.checkpoint),
         "checkpoint_sha256": _sha256(args.checkpoint),
-        "selection_metric": "validation_hard_auprc",
-        "tie_break": "validation_filtered_mrr",
+        "selection_metric": "validation_filtered_mrr",
+        "tie_break": "validation_hard_auprc",
         "decision": args.decision,
         "frozen_at": datetime.now(UTC).isoformat(),
     }

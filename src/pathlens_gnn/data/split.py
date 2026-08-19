@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from pathlens_gnn.constants import DEFAULT_SPLIT_SEED
 from pathlens_gnn.data.schema import Edge
 
 
@@ -26,7 +27,7 @@ class EdgeSplit:
 def coverage_preserving_split(
     edges: tuple[Edge, ...] | list[Edge],
     *,
-    seed: int = 13,
+    seed: int = DEFAULT_SPLIT_SEED,
     context_ratio: float = 0.60,
     train_ratio: float = 0.20,
     validation_ratio: float = 0.10,

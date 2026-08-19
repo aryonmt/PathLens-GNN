@@ -8,8 +8,7 @@ from typing import Any
 
 import yaml
 
-from pathlens_gnn.model.pathlens import PathLensConfig
-from pathlens_gnn.training.runner import TrainingConfig, train_experiment
+from pathlens_gnn.training.runner import train_experiment, training_config_from_trial
 
 SEEDS = (13, 29, 71)
 
@@ -35,45 +34,44 @@ def main() -> None:
             if metrics_path.exists():
                 metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
             else:
-                model = PathLensConfig(
-                    embedding_dim=parameters["embedding_dim"],
-                    branch_dim=spec["fixed"]["branch_dim"],
-                    expert_hidden_dim=spec["fixed"]["expert_hidden_dim"],
-                    gate_hidden_dim=parameters["gate_hidden_dim"],
-                    dropout=parameters["dropout"],
-                    s2_weighting=parameters["s2_weighting"],
-                )
                 metrics = train_experiment(
                     args.processed,
                     run_dir,
-                    TrainingConfig(
-                        seed=seed,
-                        learning_rate=parameters["learning_rate"],
-                        weight_decay=parameters["weight_decay"],
-                        max_epochs=spec["fixed"]["max_epochs"],
-                        patience=spec["fixed"]["patience"],
-                        model=model,
-                    ),
+                    training_config_from_trial(spec, parameters, seed=seed),
                 )
             runs.append(metrics)
-        values = [float(run["validation_hard_auprc"]) for run in runs]
-        summaries.append(
-            {
-                "candidate": candidate_index,
-                "parameters": parameters,
-                "runs": runs,
-                "mean_validation_hard_auprc": statistics.mean(values),
-                "sample_sd_validation_hard_auprc": statistics.stdev(values),
-                "seed_13_checkpoint": str(
-                    args.output / f"candidate-{candidate_index}" / "seed-13/checkpoint.pt"
-                ),
-            }
-        )
-    summaries.sort(key=lambda item: item["mean_validation_hard_auprc"], reverse=True)
+        auprc_values = [float(run["validation_hard_auprc"]) for run in runs]
+        mrr_values = [
+            float(run["validation_filtered_mrr"])
+            for run in runs
+            if "validation_filtered_mrr" in run
+        ]
+        summary = {
+            "candidate": candidate_index,
+            "parameters": parameters,
+            "runs": runs,
+            "mean_validation_hard_auprc": statistics.mean(auprc_values),
+            "sample_sd_validation_hard_auprc": statistics.stdev(auprc_values),
+            "seed_13_checkpoint": str(
+                args.output / f"candidate-{candidate_index}" / "seed-13/checkpoint.pt"
+            ),
+        }
+        if mrr_values:
+            summary["mean_validation_filtered_mrr"] = statistics.mean(mrr_values)
+            summary["sample_sd_validation_filtered_mrr"] = statistics.stdev(mrr_values)
+        summaries.append(summary)
+    summaries.sort(key=_confirmation_key, reverse=True)
     payload = {"seeds": list(SEEDS), "candidates": summaries, "selected": summaries[0]}
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "confirmation.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(json.dumps(payload, indent=2))
+
+
+def _confirmation_key(item: dict[str, Any]) -> tuple[float, float]:
+    return (
+        float(item.get("mean_validation_filtered_mrr", 0.0)),
+        float(item["mean_validation_hard_auprc"]),
+    )
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-dataset_version: biosnap-dti-canonical-v1
-seed: 13
+dataset_version: biosnap-dti-canonical-v2
+seed: 41
 split:
   context: 0.60
   train: 0.20

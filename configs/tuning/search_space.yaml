@@ -1,7 +1,8 @@
 budget:
   max_trials: 24
   max_wall_seconds: 345600
-  selection_metric: validation_hard_auprc
+  selection_metric: validation_filtered_mrr
+  tie_break: validation_hard_auprc
 seed: 13
 search:
   embedding_dim: [64, 128]
@@ -15,3 +16,7 @@ fixed:
   expert_hidden_dim: 64
   max_epochs: 300
   patience: 30
+  loss: sampled_softmax
+  num_negatives: 64
+  hard_negative_fraction: 0.25
+  softmax_temperature: 1.0

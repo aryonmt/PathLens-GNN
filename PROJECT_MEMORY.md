@@ -18,7 +18,8 @@ Last updated: 2026-08-19 (Asia/Tehran)
 - Split: disjoint coverage-preserving ~60/20/10/10 context / train / val / test. Context graph is not the train-edge set.
 - Every scored node has context degree ≥ 1. No cold-start evaluation.
 - Negatives are unknown non-edges (typed uniform and degree-matched hard), not experimental false interactions.
-- Selection: validation hard-negative AUPRC; filtered MRR is the tie-break.
+- Selection: validation filtered MRR, with validation hard-negative AUPRC as the tie-break, on a sealed split.
+- Training objective for campaign v2: sampled softmax over 64 typed negatives per positive (25% degree-matched mix). 1:1 BCE is a named ablation.
 - Two-hop evidence is same-type projection context, not a drug–protein path. Only 1-hop and 3-hop connect opposite types.
 - Model: sparse one-hop, resource-allocation two-hop projection, composed three-hop bridge, and pair-conditioned mixture of typed experts.
 - Tuning: at most 24 validation configurations or four wall-clock days.
@@ -28,7 +29,8 @@ Last updated: 2026-08-19 (Asia/Tehran)
 ## Repository state
 
 - `origin` is `https://github.com/aryonmt/PathLens-GNN.git`.
-- PRs #1–#4 are merged. Current Kaggle runs used commit `6613633`.
+- PRs #1–#4 are merged. Research-only tree is `50c6943` on `main`.
+- Active implementation branch: `research/ranking-loss`.
 - `legacy/` contains the preserved original repository and nested Git history and must not be modified or committed.
 - Canonical data, model, evaluation, and staged Kaggle workflow live in this repository.
 - Local Kaggle archives are gitignored under `outputs/kaggle-stages/`.
@@ -56,7 +58,9 @@ Do not compare these numbers to the SkipGNN paper PR-AUC 0.928 as a win or loss.
 
 ## Next research work
 
-Future architecture bets (ranking loss, then frozen S3 residual, then pairwise 3-hop decoder only if needed) belong on a new branch after this research-only tree is pushed. They require a new preregistered coverage-preserving split with a sealed test. The current test report is frozen evidence, not a tuning signal.
+Bet 1 is in progress on `research/ranking-loss`: sampled-softmax ranking loss on campaign `biosnap-dti-canonical-v2` (split seed 41). Do not open that test until freeze. Do not use the v1 sealed-test ZIP for model selection.
+
+If ranking loss alone beats the three-hop heuristic and SkipGNN-reimpl on val hard AUPRC and val MRR, confirm seeds 13/29/71 and stop. Otherwise add Bet 2 (frozen S3 residual) next.
 
 ## Non-negotiable scientific language
 

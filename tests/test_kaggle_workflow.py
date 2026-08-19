@@ -30,6 +30,10 @@ def test_committed_notebook_is_safe_to_run_all() -> None:
     assert 'if STAGE == "final"' in final_source
     assert "authorize_final_evaluation" in final_source
     assert "--confirm-sealed-test" in final_source
+    data_source = "".join(next(cell for cell in code_cells if cell["id"] == "data")["source"])
+    assert "prepare-data" in data_source
+    assert '"41"' in data_source
+    assert "biosnap-dti-canonical-v2" in data_source
 
 
 def test_notebook_bootstraps_current_kernel_imports() -> None:

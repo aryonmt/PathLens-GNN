@@ -61,9 +61,11 @@ def main() -> None:
         model_config = PathLensConfig(**raw_config.pop("model"))
         training_config = TrainingConfig(model=model_config, **raw_config)
         result = train_experiment(args.processed, experiment_output, training_config)
+        mrr = result.get("validation_filtered_mrr")
+        extra = f" validation_mrr={mrr:.4f}" if isinstance(mrr, int | float) else ""
         print(
             f"[registered] [{index}/{model_count}] Completed {experiment['name']} "
-            f"with validation AUPRC={result['validation_hard_auprc']:.4f}",
+            f"with validation AUPRC={result['validation_hard_auprc']:.4f}{extra}",
             flush=True,
         )
     print(
