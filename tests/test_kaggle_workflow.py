@@ -47,7 +47,7 @@ def test_committed_notebook_is_safe_to_run_all() -> None:
     assert "leaderboard.json" not in confirmation
     assert "sys.executable" in confirmation
     report = "".join(next(cell for cell in code_cells if cell["id"] == "report-stage")["source"])
-    assert "write_validation_report.py" in report
+    assert "write_validation_report" in report
     assert "--confirm-sealed-test" not in report
     assert "validation-report" in report
 

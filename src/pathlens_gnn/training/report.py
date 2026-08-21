@@ -102,6 +102,8 @@ def _evaluate_split(
     graph = BipartiteIndex(len(entities["drugs"]), len(entities["proteins"]), arrays["context"])
     known = known_proteins_by_drug(arrays["all_positive"].astype(np.int64))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[report] split={split} device={device}", flush=True)
+    print("[report] building pair-feature tables...", flush=True)
     pair_features = DevicePairFeatures.from_index(graph, device)
     freeze = None
     if freeze_record is not None:
@@ -111,12 +113,20 @@ def _evaluate_split(
 
     models: dict[str, Any] = {}
     stored: dict[str, NDArray[np.floating]] = {}
-    models["full_adaptive_ranking"], ranking_arrays = _evaluate_checkpoint(
-        Path(checkpoint), arrays, graph, pair_features, known, device, split=split
+    models["full_adaptive_ranking"], ranking_arrays = _evaluate_named(
+        "full_adaptive_ranking",
+        lambda: _evaluate_checkpoint(
+            Path(checkpoint), arrays, graph, pair_features, known, device, split=split
+        ),
     )
     stored.update(_prefix_arrays("full_adaptive_ranking", ranking_arrays))
-    for name, score_fn in _heuristic_scorers(graph).items():
-        summary, values = _evaluate_numpy_scorer(score_fn, arrays, graph, known, split=split)
+    for name, score_pairs, score_matrix in _heuristic_scorers(graph):
+        summary, values = _evaluate_named(
+            name,
+            lambda score_pairs=score_pairs, score_matrix=score_matrix: _evaluate_score_fns(
+                score_pairs, score_matrix, arrays, graph, known, split=split
+            ),
+        )
         models[name] = summary
         stored.update(_prefix_arrays(name, values))
     if registered is not None:
@@ -128,11 +138,17 @@ def _evaluate_split(
                 continue
             ckpt = Path(registered) / name / "checkpoint.pt"
             if not ckpt.exists():
+                print(f"[report] skip {name}: missing {ckpt}", flush=True)
                 continue
-            models[name], values = _evaluate_checkpoint(
-                ckpt, arrays, graph, pair_features, known, device, split=split
+            models[name], values = _evaluate_named(
+                name,
+                lambda ckpt=ckpt: _evaluate_checkpoint(
+                    ckpt, arrays, graph, pair_features, known, device, split=split
+                ),
             )
             stored.update(_prefix_arrays(name, values))
+    else:
+        print("[report] registered baselines not attached", flush=True)
     return {
         "split": split,
         "device": str(device),
@@ -195,55 +211,53 @@ def _evaluate_checkpoint(
     return summary, values
 
 
+def _evaluate_named(
+    name: str,
+    run: Callable[[], tuple[dict[str, Any], dict[str, NDArray[np.floating]]]],
+) -> tuple[dict[str, Any], dict[str, NDArray[np.floating]]]:
+    print(f"[report] scoring {name}...", flush=True)
+    summary, values = run()
+    ranking = summary["filtered_ranking"]
+    hard = summary["classification"]["hard"]
+    print(
+        f"[report] {name} hard_auprc={hard['auprc']:.4f} mrr={ranking['mrr']:.4f}",
+        flush=True,
+    )
+    return summary, values
+
+
 def _heuristic_scorers(
     graph: BipartiteIndex,
-) -> dict[str, Callable[[NDArray[np.int64]], NDArray[np.float64]]]:
-    def degree_scores(pairs: NDArray[np.int64]) -> NDArray[np.float64]:
-        return np.asarray(
-            [
-                np.log1p(
-                    len(graph.drug_neighbors[int(drug)])
-                    * len(graph.protein_neighbors[int(protein)])
-                )
-                for drug, protein in np.asarray(pairs, dtype=np.int64)
-            ],
-            dtype=np.float64,
-        )
+) -> list[tuple[str, ScoreFn, MatrixFn]]:
+    drug_degree = np.asarray(
+        [len(graph.drug_neighbors[index]) for index in range(graph.num_drugs)],
+        dtype=np.float64,
+    )
+    protein_degree = np.asarray(
+        [len(graph.protein_neighbors[index]) for index in range(graph.num_proteins)],
+        dtype=np.float64,
+    )
+    _drug_mass, _protein_mass, bridge = graph.pair_feature_tables()
 
-    def three_hop_scores(pairs: NDArray[np.int64]) -> NDArray[np.float64]:
-        return np.asarray(
-            graph.structural_features(np.asarray(pairs, dtype=np.int64))[:, 1],
-            dtype=np.float64,
-        )
+    def degree_pairs(pairs: NDArray[np.int64]) -> tuple[NDArray[np.float64], None]:
+        pairs = np.asarray(pairs, dtype=np.int64)
+        return np.log1p(drug_degree[pairs[:, 0]] * protein_degree[pairs[:, 1]]), None
 
-    return {
-        "degree_type_shortcut": degree_scores,
-        "normalized_three_hop": three_hop_scores,
-    }
+    def degree_matrix(drugs: NDArray[np.int64]) -> NDArray[np.float64]:
+        drugs = np.asarray(drugs, dtype=np.int64)
+        return np.log1p(drug_degree[drugs][:, None] * protein_degree[None, :])
 
+    def three_hop_pairs(pairs: NDArray[np.int64]) -> tuple[NDArray[np.float64], None]:
+        pairs = np.asarray(pairs, dtype=np.int64)
+        return np.asarray(bridge[pairs[:, 0], pairs[:, 1]], dtype=np.float64), None
 
-def _evaluate_numpy_scorer(
-    score_fn: Callable[[NDArray[np.int64]], NDArray[np.float64]],
-    arrays: np.lib.npyio.NpzFile,
-    graph: BipartiteIndex,
-    known: dict[int, frozenset[int]],
-    *,
-    split: str,
-) -> tuple[dict[str, Any], dict[str, NDArray[np.floating]]]:
-    def score_pairs(pairs: NDArray[np.int64]) -> tuple[NDArray[np.float64], None]:
-        return score_fn(pairs), None
+    def three_hop_matrix(drugs: NDArray[np.int64]) -> NDArray[np.float64]:
+        return np.asarray(bridge[np.asarray(drugs, dtype=np.int64)], dtype=np.float64)
 
-    def score_matrix(drugs: NDArray[np.int64]) -> NDArray[np.float64]:
-        proteins = np.arange(graph.num_proteins, dtype=np.int64)
-        rows = np.empty((len(drugs), graph.num_proteins), dtype=np.float64)
-        for row, drug in enumerate(np.asarray(drugs, dtype=np.int64)):
-            pairs = np.column_stack(
-                (np.full(graph.num_proteins, int(drug), dtype=np.int64), proteins)
-            )
-            rows[row] = score_fn(pairs)
-        return rows
-
-    return _evaluate_score_fns(score_pairs, score_matrix, arrays, graph, known, split=split)
+    return [
+        ("degree_type_shortcut", degree_pairs, degree_matrix),
+        ("normalized_three_hop", three_hop_pairs, three_hop_matrix),
+    ]
 
 
 def _evaluate_score_fns(
