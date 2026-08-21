@@ -97,6 +97,7 @@ def _evaluate_split(
     if split not in {"validation", "test"}:
         raise ValueError(f"Unsupported split: {split}")
     processed = Path(processed)
+    checkpoint = Path(checkpoint)
     entities = json.loads((processed / "entities.json").read_text(encoding="utf-8"))
     arrays = np.load(processed / "splits.npz")
     graph = BipartiteIndex(len(entities["drugs"]), len(entities["proteins"]), arrays["context"])
@@ -340,9 +341,9 @@ def _summary(payload: dict[str, Any]) -> dict[str, Any]:
     return {"split": payload["split"], "device": payload["device"], "models": models}
 
 
-def _sha256(path: Path) -> str:
+def _sha256(path: Path | str) -> str:
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
+    with Path(path).open("rb") as handle:
         while chunk := handle.read(1024 * 1024):
             digest.update(chunk)
     return digest.hexdigest()

@@ -38,7 +38,7 @@ def test_validation_report_writes_curves_without_test_metrics(tmp_path: Path) ->
     payload = write_validation_report(
         processed,
         output,
-        checkpoint=run / "checkpoint.pt",
+        checkpoint=str(run / "checkpoint.pt"),
     )
     assert payload["split"] == "validation"
     assert "test_positive" not in payload
