@@ -42,8 +42,16 @@ def select_f1_threshold(labels: NDArray[np.integer], probabilities: NDArray[np.f
     labels = np.asarray(labels, dtype=np.int64)
     probabilities = np.asarray(probabilities, dtype=np.float64)
     candidates = np.unique(np.concatenate(([0.0], probabilities, [1.0])))
-    scores = np.asarray(
-        [f1_score(labels, probabilities >= threshold, zero_division=0) for threshold in candidates]
+    predicted = probabilities[None, :] >= candidates[:, None]
+    true_positive = np.count_nonzero(predicted & (labels[None, :] == 1), axis=1)
+    false_positive = np.count_nonzero(predicted & (labels[None, :] == 0), axis=1)
+    false_negative = int((labels == 1).sum()) - true_positive
+    denominator = 2 * true_positive + false_positive + false_negative
+    scores = np.divide(
+        2 * true_positive,
+        denominator,
+        out=np.zeros(len(candidates), dtype=np.float64),
+        where=denominator > 0,
     )
     return float(candidates[int(np.argmax(scores))])
 
@@ -102,12 +110,14 @@ def bootstrap_auprc(
     samples: int = 400,
     seed: int = 20260809,
 ) -> list[float]:
+    labels = np.asarray(labels, dtype=np.int64)
+    probabilities = sigmoid(np.asarray(logits))
     generator = np.random.default_rng(seed)
     values: list[float] = []
     for _ in range(samples):
         selected = generator.integers(0, len(labels), len(labels))
         if len(np.unique(labels[selected])) == 2:
-            values.append(classification_report(labels[selected], logits[selected]).auprc)
+            values.append(float(average_precision_score(labels[selected], probabilities[selected])))
     if not values:
         return [float("nan"), float("nan")]
     return [float(value) for value in np.quantile(values, [0.025, 0.975])]
