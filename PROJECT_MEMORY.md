@@ -1,6 +1,6 @@
 # PathLens-GNN Session Handoff
 
-Last updated: 2026-08-19 (Asia/Tehran)
+Last updated: 2026-08-21 (Asia/Tehran)
 
 ## Read order
 
@@ -18,13 +18,13 @@ Last updated: 2026-08-19 (Asia/Tehran)
 - Split: disjoint coverage-preserving ~60/20/10/10 context / train / val / test. Context graph is not the train-edge set.
 - Every scored node has context degree ≥ 1. No cold-start evaluation.
 - Negatives are unknown non-edges (typed uniform and degree-matched hard), not experimental false interactions.
-- Selection: validation filtered MRR, with validation hard-negative AUPRC as the tie-break, on a sealed split.
+- Campaign v2 selection: validation filtered MRR, with validation hard-negative AUPRC as the tie-break, on a sealed split.
 - Training objective for campaign v2: sampled softmax over 64 typed negatives per positive (25% degree-matched mix). 1:1 BCE is a named ablation.
 - Two-hop evidence is same-type projection context, not a drug–protein path. Only 1-hop and 3-hop connect opposite types.
 - Model: sparse one-hop, resource-allocation two-hop projection, composed three-hop bridge, and pair-conditioned mixture of typed experts.
-- Tuning: at most 24 validation configurations or four wall-clock days.
+- Tuning remains optional. If the registered ranking configuration already beats the three-hop heuristic and SkipGNN-reimpl on validation, confirm seeds 13/29/71 and stop.
 - After a split's test set is opened, never retune or reselect on that split.
-- Training and tuning run on Kaggle; local work writes and tests research code.
+- Training runs on Kaggle; local work writes and tests research code.
 
 ## Repository state
 
@@ -34,10 +34,13 @@ Last updated: 2026-08-19 (Asia/Tehran)
 - `legacy/` contains the preserved original repository and nested Git history and must not be modified or committed.
 - Canonical data, model, evaluation, and staged Kaggle workflow live in this repository.
 - Local Kaggle archives are gitignored under `outputs/kaggle-stages/`.
+- Campaign v2 registered archive filename: `outputs/kaggle-stages/pathlens-stage-output-registered.zip`.
 
 ## Scientific status
 
-Registered, tuning (24/24), confirmation (seeds 13/29/71), freeze, and the one-time sealed test are complete for the current split.
+### Campaign v1 (`biosnap-dti-canonical-v1`, split seed 13)
+
+Registered, tuning (24/24), confirmation (seeds 13/29/71), freeze, and the one-time sealed test are complete. That test is locked.
 
 Frozen configuration (confirmation winner, seed-13 checkpoint):
 
@@ -45,8 +48,6 @@ Frozen configuration (confirmation winner, seed-13 checkpoint):
 - `s2_weighting=count`, `gate_hidden_dim=128`
 - mean validation hard AUPRC 0.869301 (sample SD 0.003142)
 - checkpoint SHA-256 `e1c2a6a6a2388da7ca95d1d621a0296cdf0d79b968277012b82e451bc4a56087`
-
-The larger seed-13 tuning leader (trial 11) was less stable across seeds and was not frozen.
 
 One-shot sealed test (seed 13, do not retune on this split):
 
@@ -56,11 +57,19 @@ One-shot sealed test (seed 13, do not retune on this split):
 
 Do not compare these numbers to the SkipGNN paper PR-AUC 0.928 as a win or loss. The protocols differ (negatives, split leakage, metrics). Paper-like uniform AUPRC is the easy setting here; hard-negative AUPRC and filtered MRR are the research targets.
 
-## Next research work
+### Campaign v2 (`biosnap-dti-canonical-v2`, split seed 41)
 
-Bet 1 is in progress on `research/ranking-loss`: sampled-softmax ranking loss on campaign `biosnap-dti-canonical-v2` (split seed 41). Do not open that test until freeze. Do not use the v1 sealed-test ZIP for model selection.
+Bet 1 (sampled-softmax ranking loss) is in progress. The test set is still sealed. Do not restore a v1 stage ZIP into this campaign.
 
-If ranking loss alone beats the three-hop heuristic and SkipGNN-reimpl on val hard AUPRC and val MRR, confirm seeds 13/29/71 and stop. Otherwise add Bet 2 (frozen S3 residual) next.
+Registered seed-13 validation (commit `71a8b6a`, Tesla T4):
+
+- normalized 3-hop heuristic hard AUPRC 0.847
+- binary SkipGNN hard AUPRC 0.835
+- PathLens + BCE hard AUPRC 0.852
+- PathLens + ranking selected hard AUPRC 0.868, selected filtered MRR 0.375 (best epoch 289/300)
+- ranking peak hard AUPRC during training was 0.888 at epoch 72; selection used MRR, not that peak
+
+Next: three-seed confirmation of `configs/model/pathlens_ranking.yaml` (13/29/71). Skip the 24-trial tuning search unless confirmation fails. Freeze only if ranking still beats the three-hop heuristic and SkipGNN-reimpl on both validation metrics, then open the sealed test once.
 
 ## Non-negotiable scientific language
 

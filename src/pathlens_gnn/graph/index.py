@@ -37,16 +37,35 @@ class BipartiteIndex:
             index: tuple(sorted(protein_neighbors.get(index, set())))
             for index in range(num_proteins)
         }
+        self._pair_feature_tables: (
+            tuple[NDArray[np.float32], NDArray[np.float32], NDArray[np.float32]] | None
+        ) = None
+
+    def pair_feature_tables(
+        self,
+    ) -> tuple[NDArray[np.float32], NDArray[np.float32], NDArray[np.float32]]:
+        if self._pair_feature_tables is None:
+            drug_mass = np.asarray(
+                [self.projection_mass_drug(index) for index in range(self.num_drugs)],
+                dtype=np.float32,
+            )
+            protein_mass = np.asarray(
+                [self.projection_mass_protein(index) for index in range(self.num_proteins)],
+                dtype=np.float32,
+            )
+            bridge = np.empty((self.num_drugs, self.num_proteins), dtype=np.float32)
+            for drug in range(self.num_drugs):
+                bridge[drug] = self.bridge_scores_for_drug(drug)
+            self._pair_feature_tables = (drug_mass, protein_mass, bridge)
+        return self._pair_feature_tables
 
     def structural_features(self, pairs: NDArray[np.int64]) -> NDArray[np.float32]:
-        result = np.empty((len(pairs), 2), dtype=np.float32)
-        for row, (drug, protein) in enumerate(np.asarray(pairs, dtype=np.int64)):
-            paths = self.bridge_paths(int(drug), int(protein), limit=None)
-            result[row, 0] = self.projection_mass_drug(
-                int(drug)
-            ) + self.projection_mass_protein(int(protein))
-            result[row, 1] = sum(path.weight for path in paths)
-        return result
+        pairs = np.asarray(pairs, dtype=np.int64)
+        drug_mass, protein_mass, bridge = self.pair_feature_tables()
+        features = np.empty((len(pairs), 2), dtype=np.float32)
+        features[:, 0] = drug_mass[pairs[:, 0]] + protein_mass[pairs[:, 1]]
+        features[:, 1] = bridge[pairs[:, 0], pairs[:, 1]]
+        return features
 
     def bridge_scores_for_drug(self, drug: int) -> NDArray[np.float32]:
         scores = np.zeros(self.num_proteins, dtype=np.float32)

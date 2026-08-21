@@ -16,7 +16,9 @@ benchmark and model study, not a product or clinical application.
 1. A canonical typed dataset and leakage-safe benchmark.
 2. Faithful structural and SkipGNN baselines.
 3. A sparse path-aware model with controlled ablations.
-4. Preregistered tuning, multi-seed confirmation, freeze, and a one-time sealed test.
+4. Multi-seed confirmation, freeze, and a one-time sealed test. Hyperparameter
+   tuning is optional when a preregistered champion already beats the registered
+   baselines.
 5. Honest reporting when an ablation or heuristic beats the adaptive model.
 
 ## Out of scope
@@ -27,8 +29,9 @@ database, global full-graph rendering, and guaranteed uncertainty estimates.
 
 ## Success policy
 
-Model selection uses validation hard-negative AUPRC, with filtered MRR as the
-tie-break. If the adaptive model does not beat a registered ablation or
-heuristic after the registered budget, the negative result is reported and the
-strongest valid candidate is frozen. After the sealed test is opened, that split
-is never reused for selection.
+Campaign v1 selected on validation hard-negative AUPRC, with filtered MRR as
+the tie-break. Campaign v2 (ranking loss) selects on validation filtered MRR,
+with hard-negative AUPRC as the tie-break. If the adaptive model does not beat a
+registered ablation or heuristic after the registered budget, the negative result
+is reported and the strongest valid candidate is frozen. After the sealed test is
+opened, that split is never reused for selection.

@@ -1,0 +1,39 @@
+from __future__ import annotations
+
+import numpy as np
+
+from pathlens_gnn.evaluation.ranking import (
+    filtered_per_drug_ranking,
+    filtered_per_drug_ranking_from_scores,
+)
+
+
+def test_filtered_ranking_from_score_matrix_matches_pair_scorer() -> None:
+    positives = np.asarray([[0, 1], [0, 2], [1, 0]], dtype=np.int64)
+    scores = np.asarray(
+        [
+            [0.1, 0.9, 0.4],
+            [0.8, 0.2, 0.3],
+        ],
+        dtype=np.float64,
+    )
+    known_by_drug = {0: frozenset({1, 2}), 1: frozenset({0})}
+
+    def score_pairs(pairs: np.ndarray) -> np.ndarray:
+        return np.asarray([scores[int(drug), int(protein)] for drug, protein in pairs])
+
+    from_pairs = filtered_per_drug_ranking(
+        positives,
+        num_proteins=3,
+        known_by_drug=known_by_drug,
+        score_pairs=score_pairs,
+    )
+    from_matrix = filtered_per_drug_ranking_from_scores(
+        positives,
+        scores=scores,
+        known_by_drug=known_by_drug,
+    )
+    assert from_matrix.queries == 3
+    assert from_matrix.mrr == from_pairs.mrr
+    assert from_matrix.hits_at_10 == from_pairs.hits_at_10
+    assert from_matrix.hits_at_50 == from_pairs.hits_at_50

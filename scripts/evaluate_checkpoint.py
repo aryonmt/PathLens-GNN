@@ -13,9 +13,11 @@ import torch
 from numpy.typing import NDArray
 
 from pathlens_gnn.evaluation.metrics import classification_report, select_f1_threshold, sigmoid
-from pathlens_gnn.evaluation.ranking import filtered_per_drug_ranking
+from pathlens_gnn.evaluation.ranking import filtered_per_drug_ranking_from_scores
 from pathlens_gnn.graph.index import BipartiteIndex
 from pathlens_gnn.model.pathlens import PathLensConfig, PathLensGNN
+from pathlens_gnn.training.ranking import known_proteins_by_drug
+from pathlens_gnn.training.scoring import DevicePairFeatures, score_all_proteins
 
 
 def main() -> None:
@@ -61,37 +63,23 @@ def evaluate(processed: Path, checkpoint_path: Path) -> dict[str, Any]:
     print(f"[final] device={device} seed={checkpoint['training_config']['seed']}", flush=True)
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
+    pair_features = DevicePairFeatures.from_index(graph, device)
     with torch.inference_mode():
         embeddings = model.encode()
     print("[final] Encoded graph; scoring validation for threshold...", flush=True)
 
-    projection_drug = np.asarray(
-        [graph.projection_mass_drug(index) for index in range(num_drugs)], dtype=np.float32
-    )
-    projection_protein = np.asarray(
-        [graph.projection_mass_protein(index) for index in range(num_proteins)],
-        dtype=np.float32,
-    )
-
     def score_pairs(pairs: NDArray[np.int64]) -> NDArray[np.float64]:
         pairs = np.asarray(pairs, dtype=np.int64)
-        result = np.empty(len(pairs), dtype=np.float64)
-        for drug in np.unique(pairs[:, 0]):
-            selected = np.flatnonzero(pairs[:, 0] == drug)
-            proteins = pairs[selected, 1]
-            bridge = graph.bridge_scores_for_drug(int(drug))[proteins]
-            features = np.column_stack(
-                (projection_drug[int(drug)] + projection_protein[proteins], bridge)
+        drugs = torch.as_tensor(pairs[:, 0], dtype=torch.long, device=device)
+        proteins = torch.as_tensor(pairs[:, 1], dtype=torch.long, device=device)
+        with torch.inference_mode():
+            output = model.score_from_embeddings(
+                embeddings,
+                drugs,
+                proteins,
+                pair_features.lookup(drugs, proteins),
             )
-            with torch.inference_mode():
-                output = model.score_from_embeddings(
-                    embeddings,
-                    torch.full((len(selected),), int(drug), dtype=torch.long, device=device),
-                    torch.as_tensor(proteins, dtype=torch.long, device=device),
-                    torch.as_tensor(features, dtype=torch.float32, device=device),
-                )
-            result[selected] = output.logit.detach().cpu().numpy()
-        return result
+        return output.logit.detach().cpu().numpy().astype(np.float64, copy=False)
 
     validation_pairs, validation_labels = _candidates(
         arrays["validation_positive"], arrays["validation_hard"]
@@ -111,22 +99,25 @@ def evaluate(processed: Path, checkpoint_path: Path) -> dict[str, Any]:
             "degree_slices": _degree_slices(labels, logits, pairs, graph, threshold),
         }
 
-    known_by_drug: dict[int, frozenset[int]] = {}
-    for drug in range(num_drugs):
-        known_by_drug[drug] = frozenset(
-            int(protein) for source, protein in arrays["all_positive"] if int(source) == drug
-        )
+    known_by_drug = known_proteins_by_drug(arrays["all_positive"].astype(np.int64))
     print(
-        "[final] Starting filtered ranking over all proteins per eligible drug; "
-        "this step has no epoch logs and can take a long time.",
+        "[final] Starting filtered ranking over all proteins per eligible drug.",
         flush=True,
     )
     ranking_started = time.perf_counter()
-    ranking = filtered_per_drug_ranking(
-        arrays["test_positive"],
-        num_proteins=num_proteins,
+    unique_drugs = np.unique(arrays["test_positive"][:, 0].astype(np.int64))
+    with torch.inference_mode():
+        score_matrix = score_all_proteins(
+            model,
+            embeddings,
+            pair_features,
+            torch.as_tensor(unique_drugs, dtype=torch.long, device=device),
+        )
+    ranking = filtered_per_drug_ranking_from_scores(
+        arrays["test_positive"].astype(np.int64),
+        scores=score_matrix.detach().cpu().numpy(),
         known_by_drug=known_by_drug,
-        score_pairs=score_pairs,
+        drug_ids=unique_drugs,
     )
     sample_pairs = np.column_stack(
         (np.zeros(min(512, num_proteins), dtype=np.int64), np.arange(min(512, num_proteins)))

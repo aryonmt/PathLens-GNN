@@ -7,7 +7,7 @@ The documentation is split by decision boundary so that Issues and pull requests
 | Intent and scope | `decisions/PROJECT_CHARTER.md` |
 | Legacy defects | `research/LEGACY_AUDIT.md` |
 | Model definition | `research/RESEARCH_SPEC.md` |
-| Split, metrics, tuning | `research/EVALUATION_PROTOCOL.md` |
+| Split, metrics, confirmation | `research/EVALUATION_PROTOCOL.md` |
 | Literature and attribution | `research/LITERATURE_REVIEW.md` |
 | Kaggle execution | `../kaggle/README.md` |
 

@@ -18,6 +18,8 @@ Each branch applies one sparse propagation followed by a learned linear projecti
 
 Each channel has a typed nonlinear expert over `[z_drug, z_protein, z_drug * z_protein]` and emits `s1`, `s2`, or `s3`. A gate consumes all channel embeddings and log-scaled projection/bridge statistics and emits `alpha = softmax(...)`. The final logit is exactly `sum(alpha_h * s_h)`.
 
+Those projection/bridge statistics are the same pair-level masses and normalized three-hop weights as the heuristic. They may be materialized once as lookup tables. They are not a dense `A^2`/`A^3` message-passing operator.
+
 Training for campaign v2 uses sampled softmax (InfoNCE) over the positive and 64 typed negatives per edge. 1:1 BCE remains a named ablation. No post-fusion MLP is allowed because it would make channel-logit contributions unfaithful.
 
 ## Interpretation contract

@@ -24,7 +24,9 @@ Campaign `biosnap-dti-canonical-v1` used split seed 13. Its sealed test is opene
 
 For the ranking-loss campaign: primary validation filtered per-drug MRR, with validation hard-negative AUPRC as the tie-break. Freeze only if the selected model also beats the normalized three-hop heuristic and the binary SkipGNN reimplementation on both metrics. Test remains sealed until freeze.
 
-Tuning ends after 24 configurations or four wall-clock days. The search covers embedding dimension, dropout, learning rate, weight decay, S2 weighting, and gate width. Ranking-loss hyperparameters stay fixed (`num_negatives=64`, `hard_negative_fraction=0.25`, `softmax_temperature=1.0`). Initial trials use training seed 13; the two leading configurations are rerun on seeds 13, 29, and 71.
+If the registered ranking configuration already beats those baselines on validation, skip the 24-trial search and confirm `configs/model/pathlens_ranking.yaml` on seeds 13, 29, and 71. Tuning remains available when that stop-early rule fails.
+
+Tuning, when used, ends after 24 configurations or four wall-clock days. The search covers embedding dimension, dropout, learning rate, weight decay, S2 weighting, and gate width. Ranking-loss hyperparameters stay fixed (`num_negatives=64`, `hard_negative_fraction=0.25`, `softmax_temperature=1.0`). Initial trials use training seed 13; the two leading configurations are rerun on seeds 13, 29, and 71.
 
 ## Reports
 

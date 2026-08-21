@@ -96,6 +96,11 @@ class PathLensGNN(nn.Module):
             nn.Linear(self.config.gate_hidden_dim, 3),
         )
         self.reset_parameters()
+        self.register_buffer(
+            "_enabled_channels",
+            torch.tensor(self.config.enabled_channels, dtype=torch.bool),
+            persistent=False,
+        )
 
     def reset_parameters(self) -> None:
         nn.init.normal_(self.node_embedding.weight, std=0.02)
@@ -156,11 +161,7 @@ class PathLensGNN(nn.Module):
         if structural_features.shape != (drug_index.shape[0], 2):
             raise ValueError("structural_features must have shape [num_pairs, 2]")
 
-        enabled = torch.tensor(
-            self.config.enabled_channels,
-            device=expert_logits.device,
-            dtype=torch.bool,
-        )
+        enabled = self._enabled_channels
         if not bool(enabled.any()):
             raise ValueError("At least one channel must be enabled")
         if self.config.adaptive_gate:

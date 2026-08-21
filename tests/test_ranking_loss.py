@@ -57,6 +57,25 @@ def test_ranked_negatives_never_include_known_positives_and_are_deterministic() 
     assert 0 not in first[1] and 2 not in first[1]
 
 
+def test_ranked_negatives_reuse_allowed_pool_per_drug() -> None:
+    positives = np.asarray([[0, 1], [0, 2], [1, 0]], dtype=np.int64)
+    known_by_drug = {0: frozenset({1, 2}), 1: frozenset({0, 3})}
+    protein_degrees = np.asarray([2, 2, 1, 1], dtype=np.int64)
+    sampled = sample_ranked_negatives(
+        positives,
+        num_proteins=4,
+        known_by_drug=known_by_drug,
+        protein_degrees=protein_degrees,
+        num_negatives=4,
+        hard_fraction=0.0,
+        seed=3,
+    )
+    assert sampled.shape == (3, 4)
+    assert not np.isin(sampled[0], [1, 2]).any()
+    assert not np.isin(sampled[1], [1, 2]).any()
+    assert not np.isin(sampled[2], [0, 3]).any()
+
+
 def test_hard_negative_mix_prefers_same_degree_quantile() -> None:
     positives = np.asarray([[0, 0]], dtype=np.int64)
     known_by_drug = {0: frozenset({0})}

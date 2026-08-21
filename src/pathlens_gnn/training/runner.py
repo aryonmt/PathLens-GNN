@@ -9,11 +9,12 @@ from typing import Any
 
 import numpy as np
 import torch
+import yaml
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from pathlens_gnn.evaluation.metrics import classification_report
-from pathlens_gnn.evaluation.ranking import filtered_per_drug_ranking
+from pathlens_gnn.evaluation.ranking import filtered_per_drug_ranking_from_scores
 from pathlens_gnn.graph.index import BipartiteIndex
 from pathlens_gnn.model.pathlens import PathLensConfig, PathLensGNN
 from pathlens_gnn.training.ranking import (
@@ -21,6 +22,7 @@ from pathlens_gnn.training.ranking import (
     sample_ranked_negatives,
     sampled_softmax_loss,
 )
+from pathlens_gnn.training.scoring import DevicePairFeatures, score_all_proteins
 
 RANKING_LOSS = "sampled_softmax"
 BCE_LOSS = "bce"
@@ -79,6 +81,16 @@ def training_config_from_trial(
     )
 
 
+def training_config_from_yaml(path: str | Path, *, seed: int | None = None) -> TrainingConfig:
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    model_raw = dict(raw.pop("model"))
+    if "enabled_channels" in model_raw:
+        model_raw["enabled_channels"] = tuple(model_raw["enabled_channels"])
+    if seed is not None:
+        raw["seed"] = seed
+    return TrainingConfig(model=PathLensConfig(**model_raw), **raw)
+
+
 def train_experiment(
     processed_dir: str | Path,
     output_dir: str | Path,
@@ -112,6 +124,8 @@ def train_experiment(
     bce_criterion = nn.BCEWithLogitsLoss()
 
     preprocessing_start = time.perf_counter()
+    graph_index.pair_feature_tables()
+    pair_features = DevicePairFeatures.from_index(graph_index, device)
     train_positive = arrays["train_positive"].astype(np.int64)
     known_by_drug = known_proteins_by_drug(arrays["all_positive"])
     protein_degrees = np.bincount(context[:, 1], minlength=num_proteins).astype(np.int64)
@@ -125,12 +139,14 @@ def train_experiment(
     validation_tensors = _to_tensors(
         validation_pairs, validation_labels, validation_features, device
     )
-    train_positive_features = graph_index.structural_features(train_positive)
+    positive_drugs = torch.as_tensor(train_positive[:, 0], dtype=torch.long, device=device)
+    positive_proteins = torch.as_tensor(train_positive[:, 1], dtype=torch.long, device=device)
+    positive_feature_tensor = pair_features.lookup(positive_drugs, positive_proteins)
     print(
         f"[train] Prepared {len(train_positive)} train positives and "
-        f"{len(validation_pairs)} validation pairs on CPU in "
+        f"{len(validation_pairs)} validation pairs in "
         f"{time.perf_counter() - preprocessing_start:.1f}s; "
-        f"training tensors moved to {device}",
+        f"pair features and training tensors are on {device}",
         flush=True,
     )
 
@@ -148,9 +164,11 @@ def train_experiment(
         if ranking_loss:
             loss = _ranking_epoch_loss(
                 model,
-                graph_index,
+                pair_features,
                 train_positive,
-                train_positive_features,
+                positive_drugs,
+                positive_proteins,
+                positive_feature_tensor,
                 known_by_drug,
                 protein_degrees,
                 config,
@@ -180,10 +198,9 @@ def train_experiment(
                 _validation_mrr(
                     model,
                     embeddings,
-                    graph_index,
+                    pair_features,
                     arrays["validation_positive"].astype(np.int64),
                     known_by_drug,
-                    num_proteins,
                     device,
                 )
                 if ranking_loss
@@ -262,9 +279,11 @@ def train_experiment(
 
 def _ranking_epoch_loss(
     model: PathLensGNN,
-    graph_index: BipartiteIndex,
+    pair_features: DevicePairFeatures,
     train_positive: NDArray[np.int64],
-    train_positive_features: NDArray[np.float32],
+    positive_drugs: Tensor,
+    positive_proteins: Tensor,
+    positive_feature_tensor: Tensor,
     known_by_drug: dict[int, frozenset[int]],
     protein_degrees: NDArray[np.int64],
     config: TrainingConfig,
@@ -281,24 +300,16 @@ def _ranking_epoch_loss(
         seed=config.seed + epoch * 1_000_003,
     )
     embeddings = model.encode()
-    positive_drugs, positive_proteins, positive_features = _pair_tensors(
-        train_positive, train_positive_features, device
-    )
     positive_logits = model.score_from_embeddings(
-        embeddings, positive_drugs, positive_proteins, positive_features
+        embeddings, positive_drugs, positive_proteins, positive_feature_tensor
     ).logit
-    flat_pairs = np.column_stack(
-        (
-            np.repeat(train_positive[:, 0], config.num_negatives),
-            negatives.reshape(-1),
-        )
-    )
-    negative_features = graph_index.structural_features(flat_pairs)
-    negative_drugs, negative_proteins, negative_feature_tensor = _pair_tensors(
-        flat_pairs, negative_features, device
-    )
+    negative_proteins = torch.as_tensor(negatives.reshape(-1), dtype=torch.long, device=device)
+    negative_drugs = positive_drugs.repeat_interleave(config.num_negatives)
     negative_logits = model.score_from_embeddings(
-        embeddings, negative_drugs, negative_proteins, negative_feature_tensor
+        embeddings,
+        negative_drugs,
+        negative_proteins,
+        pair_features.lookup(negative_drugs, negative_proteins),
     ).logit.view(len(train_positive), config.num_negatives)
     return sampled_softmax_loss(
         positive_logits,
@@ -310,23 +321,19 @@ def _ranking_epoch_loss(
 def _validation_mrr(
     model: PathLensGNN,
     embeddings: tuple[Tensor, Tensor, Tensor],
-    graph_index: BipartiteIndex,
+    pair_features: DevicePairFeatures,
     validation_positive: NDArray[np.int64],
     known_by_drug: dict[int, frozenset[int]],
-    num_proteins: int,
     device: torch.device,
 ) -> float:
-    def score_pairs(pairs: NDArray[np.int64]) -> NDArray[np.floating]:
-        features = graph_index.structural_features(pairs)
-        drugs, proteins, feature_tensor = _pair_tensors(pairs, features, device)
-        logits = model.score_from_embeddings(embeddings, drugs, proteins, feature_tensor).logit
-        return logits.detach().cpu().numpy()
-
-    report = filtered_per_drug_ranking(
+    unique_drugs = np.unique(validation_positive[:, 0])
+    drug_tensor = torch.as_tensor(unique_drugs, dtype=torch.long, device=device)
+    scores = score_all_proteins(model, embeddings, pair_features, drug_tensor)
+    report = filtered_per_drug_ranking_from_scores(
         validation_positive,
-        num_proteins=num_proteins,
+        scores=scores.detach().cpu().numpy(),
         known_by_drug=known_by_drug,
-        score_pairs=score_pairs,
+        drug_ids=unique_drugs,
     )
     return report.mrr
 

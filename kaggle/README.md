@@ -1,15 +1,16 @@
 # Kaggle Training Runbook
 
 Kaggle is the authoritative GPU environment for smoke training, registered
-experiments, tuning, multi-seed confirmation, freeze, and the one-time sealed
-evaluation. Local development does not require a CUDA installation.
+experiments, optional tuning, multi-seed confirmation, freeze, and the one-time
+sealed evaluation. Local development does not require a CUDA installation.
 
 Campaign `biosnap-dti-canonical-v2` uses split seed 41. Do not restore a v1
-processed dataset or a v1 stage ZIP into this campaign.
+processed dataset or a v1 stage ZIP into this campaign. The local registered
+archive is `outputs/kaggle-stages/pathlens-stage-output-registered.zip`.
 
 ## Kernel settings
 
-- Accelerator: GPU (P100, T4, or the current available GPU)
+- Accelerator: GPU T4. One GPU is enough; the trainer uses `cuda:0` only.
 - Internet: enabled while cloning the public repository and downloading BioSNAP
 - Persistence: preserve `/kaggle/working/pathlens-stage-output.zip` before a session ends
 
@@ -25,14 +26,17 @@ The first notebook cell exposes one `STAGE` value:
 |---|---|---|
 | `smoke` | Three-epoch GPU and pipeline check | none |
 | `registered` | Heuristics and preregistered model/baseline suite | none |
-| `tuning` | Up to 24 seed-13 validation configurations | prior tuning ZIP when resuming |
-| `confirmation` | Top two configurations on seeds 13, 29, and 71 | completed tuning ZIP |
+| `tuning` | Optional. Up to 24 seed-13 validation configurations | prior tuning ZIP when resuming |
+| `confirmation` | `pathlens_ranking.yaml` on seeds 13, 29, and 71 | none, or a confirmation ZIP to resume |
 | `freeze` | Persist the validation-only model choice and checkpoint hash | confirmation ZIP |
 | `final` | Open the sealed test exactly once | frozen output ZIP and explicit token |
 
 The committed default is `STAGE = "smoke"`. Therefore **Save & Run All is safe by
 default**: it cannot tune or access test arrays. Change only one stage per Kaggle
 version.
+
+Campaign v2 skips `tuning` unless confirmation of the registered ranking
+configuration fails the stop-early rule in `docs/research/EVALUATION_PROTOCOL.md`.
 
 `pathlens_training.ipynb` is the only committed training notebook. Do not add
 session-specific operator notebooks to the repository.
@@ -50,7 +54,7 @@ session, add that output through Kaggle's **Add Input** panel and set
 `RESUME_ARCHIVE` to the resulting path, for example:
 
 ```python
-RESUME_ARCHIVE = "/kaggle/input/pathlens-tuning-output/pathlens-stage-output.zip"
+RESUME_ARCHIVE = "/kaggle/input/pathlens-registered-output/pathlens-stage-output.zip"
 ```
 
 The notebook validates ZIP paths before extraction. Registered experiments,
