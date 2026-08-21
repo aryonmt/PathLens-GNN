@@ -8,7 +8,9 @@ from sklearn.metrics import (
     average_precision_score,
     brier_score_loss,
     f1_score,
+    precision_recall_curve,
     roc_auc_score,
+    roc_curve,
 )
 
 
@@ -91,3 +93,37 @@ def classification_report(
         ece=expected_calibration_error(labels, probabilities),
         samples=len(labels),
     )
+
+
+def bootstrap_auprc(
+    labels: NDArray[np.int64],
+    logits: NDArray[np.float64],
+    *,
+    samples: int = 400,
+    seed: int = 20260809,
+) -> list[float]:
+    generator = np.random.default_rng(seed)
+    values: list[float] = []
+    for _ in range(samples):
+        selected = generator.integers(0, len(labels), len(labels))
+        if len(np.unique(labels[selected])) == 2:
+            values.append(classification_report(labels[selected], logits[selected]).auprc)
+    if not values:
+        return [float("nan"), float("nan")]
+    return [float(value) for value in np.quantile(values, [0.025, 0.975])]
+
+
+def classification_curves(
+    labels: NDArray[np.integer],
+    logits: NDArray[np.floating],
+) -> dict[str, NDArray[np.float64]]:
+    labels = np.asarray(labels, dtype=np.int64)
+    probabilities = sigmoid(np.asarray(logits))
+    precision, recall, _pr_thresholds = precision_recall_curve(labels, probabilities)
+    fpr, tpr, _roc_thresholds = roc_curve(labels, probabilities)
+    return {
+        "precision": np.asarray(precision, dtype=np.float64),
+        "recall": np.asarray(recall, dtype=np.float64),
+        "fpr": np.asarray(fpr, dtype=np.float64),
+        "tpr": np.asarray(tpr, dtype=np.float64),
+    }

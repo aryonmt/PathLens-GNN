@@ -11,14 +11,14 @@ codebase. It is not a product, web application, or clinical tool.
 
 The repository contains the canonical BioSNAP DTI pipeline, sparse three-channel
 model, registered baselines and ablations, and a staged Kaggle workflow
-(`smoke` → `registered` → `confirmation` → `freeze` → `final`, with optional
-`tuning` before confirmation).
+(`smoke` → `registered` → `confirmation` → `freeze` → `report` → `final`, with
+optional `tuning` before confirmation). `report` writes validation plot
+artifacts and does not open the sealed test.
 
 A validation-selected configuration is frozen on campaign v1 (split seed 13).
 That sealed test was opened once and must not be used for further selection.
 Campaign v2 (split seed 41) is the current sealed ranking-loss campaign.
-Confirmation uses `configs/model/pathlens_ranking.yaml` unless a later tuning
-search produces a new leaderboard.
+The frozen v2 checkpoint is the confirmed `pathlens_ranking.yaml` seed-13 run.
 
 The archived SkipGNN repository remains locally under `legacy/` and is
 intentionally excluded from Git.

@@ -26,6 +26,8 @@ For the ranking-loss campaign: primary validation filtered per-drug MRR, with va
 
 If the registered ranking configuration already beats those baselines on validation, skip the 24-trial search and confirm `configs/model/pathlens_ranking.yaml` on seeds 13, 29, and 71. Tuning remains available when that stop-early rule fails.
 
+After freeze, run the `report` stage on validation only. It must write PR/ROC curve points, per-query ranks, Hits@K, degree slices, gate means, and filtered MRR for the frozen model plus registered heuristics/baselines. It must not score test arrays. The one-shot `final` stage writes the same artifact types for the sealed test, including `final-artifacts.npz`.
+
 Tuning, when used, ends after 24 configurations or four wall-clock days. The search covers embedding dimension, dropout, learning rate, weight decay, S2 weighting, and gate width. Ranking-loss hyperparameters stay fixed (`num_negatives=64`, `hard_negative_fraction=0.25`, `softmax_temperature=1.0`). Initial trials use training seed 13; the two leading configurations are rerun on seeds 13, 29, and 71.
 
 ## Reports

@@ -1,12 +1,14 @@
 # Kaggle Training Runbook
 
 Kaggle is the authoritative GPU environment for smoke training, registered
-experiments, optional tuning, multi-seed confirmation, freeze, and the one-time
-sealed evaluation. Local development does not require a CUDA installation.
+experiments, optional tuning, multi-seed confirmation, freeze, validation
+reporting, and the one-time sealed evaluation. Local development does not
+require a CUDA installation.
 
 Campaign `biosnap-dti-canonical-v2` uses split seed 41. Do not restore a v1
-processed dataset or a v1 stage ZIP into this campaign. The local registered
-archive is `outputs/kaggle-stages/pathlens-stage-output-registered.zip`.
+processed dataset or a v1 stage ZIP into this campaign. Local archives live
+under `outputs/kaggle-stages/` as `pathlens-stage-output-v2-*.zip`. Do not
+restore `pathlens-stage-output-v1-*.zip` into campaign v2.
 
 ## Kernel settings
 
@@ -29,6 +31,7 @@ The first notebook cell exposes one `STAGE` value:
 | `tuning` | Optional. Up to 24 seed-13 validation configurations | prior tuning ZIP when resuming |
 | `confirmation` | `pathlens_ranking.yaml` on seeds 13, 29, and 71 | none, or a confirmation ZIP to resume |
 | `freeze` | Persist the validation-only model choice and checkpoint hash | confirmation ZIP |
+| `report` | Validation plot artifacts (PR/ROC, ranks, Hits@K, gates, baseline MRR) | freeze ZIP; optional registered ZIP |
 | `final` | Open the sealed test exactly once | frozen output ZIP and explicit token |
 
 The committed default is `STAGE = "smoke"`. Therefore **Save & Run All is safe by
@@ -54,11 +57,14 @@ session, add that output through Kaggle's **Add Input** panel and set
 `RESUME_ARCHIVE` to the resulting path, for example:
 
 ```python
-RESUME_ARCHIVE = "/kaggle/input/pathlens-stage-output-9/pathlens-stage-output.zip"
+RESUME_ARCHIVE = "/kaggle/input/datasets/<username>/pathlens-stage-output-v2-freeze"
+REGISTERED_ARCHIVE = "/kaggle/input/datasets/<username>/pathlens-stage-output-v2-registered"
 ```
 
-Use the ZIP **file**, not the dataset folder and not a website path like
-`/kaggle/input/datasets/<username>/...`. List files with:
+On this Kaggle account, Add Input often mounts extracted folders under
+`/kaggle/input/datasets/<username>/<slug>`, not a `.zip` file. Point
+`RESUME_ARCHIVE` at the folder that contains `model-freeze.json` or
+`confirmation/confirmation.json`. List files with:
 
 ```python
 from pathlib import Path
@@ -66,9 +72,9 @@ for path in Path("/kaggle/input").rglob("*"):
     print(path)
 ```
 
-The notebook validates ZIP paths before extraction. Registered experiments,
-tuning trials, and multi-seed confirmation skip complete checkpoint/metrics pairs
-and continue missing work. `run_tuning.py` persists `run_state.json`, binds the
+The notebook restores a ZIP file or an extracted folder that contains the prior
+stage files. Registered experiments, tuning trials, and multi-seed confirmation
+skip complete checkpoint/metrics pairs and continue missing work. `run_tuning.py` persists `run_state.json`, binds the
 resume to the registered search-space hash, and accumulates active runtime across
 sessions. A changed search space or budget is rejected. Each Kaggle tuning
 invocation stops after nine hours by default, leaving time for the final archive
@@ -77,7 +83,8 @@ cell to produce the resumable ZIP before the hosted session limit.
 ## Sealed-test procedure
 
 The test set stays unopened through `smoke`, `registered`, `tuning`,
-`confirmation`, and `freeze`. After freeze is on disk, run `final` with:
+`confirmation`, `freeze`, and `report`. After freeze is on disk, run `report`
+to write validation curves and baseline ranking tables. Then run `final` with:
 
 ```python
 STAGE = "final"

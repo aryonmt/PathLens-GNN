@@ -16,9 +16,9 @@ benchmark and model study, not a product or clinical application.
 1. A canonical typed dataset and leakage-safe benchmark.
 2. Faithful structural and SkipGNN baselines.
 3. A sparse path-aware model with controlled ablations.
-4. Multi-seed confirmation, freeze, and a one-time sealed test. Hyperparameter
-   tuning is optional when a preregistered champion already beats the registered
-   baselines.
+4. Multi-seed confirmation, freeze, validation reporting artifacts, and a
+   one-time sealed test. Hyperparameter tuning is optional when a preregistered
+   champion already beats the registered baselines.
 5. Honest reporting when an ablation or heuristic beats the adaptive model.
 
 ## Out of scope

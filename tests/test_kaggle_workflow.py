@@ -25,6 +25,8 @@ def test_committed_notebook_is_safe_to_run_all() -> None:
     parameters_source = "".join(parameters["source"])
     assert 'STAGE = "smoke"' in parameters_source
     assert "export" not in parameters_source
+    assert "report" in parameters_source
+    assert "REGISTERED_ARCHIVE" in parameters_source
     final_stage = next(cell for cell in code_cells if cell["id"] == "final-stage")
     final_source = "".join(final_stage["source"])
     assert 'if STAGE == "final"' in final_source
@@ -44,6 +46,10 @@ def test_committed_notebook_is_safe_to_run_all() -> None:
     assert "pathlens_ranking.yaml" in confirmation
     assert "leaderboard.json" not in confirmation
     assert "sys.executable" in confirmation
+    report = "".join(next(cell for cell in code_cells if cell["id"] == "report-stage")["source"])
+    assert "write_validation_report.py" in report
+    assert "--confirm-sealed-test" not in report
+    assert "validation-report" in report
 
 
 def test_notebook_bootstraps_current_kernel_imports() -> None:

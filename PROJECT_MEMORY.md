@@ -34,7 +34,7 @@ Last updated: 2026-08-21 (Asia/Tehran)
 - `legacy/` contains the preserved original repository and nested Git history and must not be modified or committed.
 - Canonical data, model, evaluation, and staged Kaggle workflow live in this repository.
 - Local Kaggle archives are gitignored under `outputs/kaggle-stages/`.
-- Campaign v2 registered archive filename: `outputs/kaggle-stages/pathlens-stage-output-registered.zip`.
+- Name campaign archives `pathlens-stage-output-v1-*.zip` and `pathlens-stage-output-v2-*.zip`. Never mix them.
 
 ## Scientific status
 
@@ -69,7 +69,15 @@ Registered seed-13 validation (commit `71a8b6a`, Tesla T4):
 - PathLens + ranking selected hard AUPRC 0.868, selected filtered MRR 0.375 (best epoch 289/300)
 - ranking peak hard AUPRC during training was 0.888 at epoch 72; selection used MRR, not that peak
 
-Next: three-seed confirmation of `configs/model/pathlens_ranking.yaml` (13/29/71). Skip the 24-trial tuning search unless confirmation fails. Freeze only if ranking still beats the three-hop heuristic and SkipGNN-reimpl on both validation metrics, then open the sealed test once.
+Confirmation (commit `d1c9fc2`, seeds 13/29/71):
+
+- mean validation hard AUPRC 0.883 (sample SD 0.013)
+- mean validation filtered MRR 0.373 (sample SD 0.003)
+- seed-13 checkpoint SHA-256 `646700d456ba4cb0de795e7067e1830e8f18598b97fe5cc89d195d631d356586`
+
+Freeze (commit `6dd1ddc`) recorded that seed-13 checkpoint. The test set is still sealed.
+
+Next: run `report` with the v2 freeze ZIP and the v2 registered ZIP. That writes validation PR/ROC points, ranks, Hits@K, degree slices, gate weights, and baseline MRR without opening test. Then run `final` once; it writes `final-artifacts.npz` as well as the summary JSON.
 
 ## Non-negotiable scientific language
 

@@ -5,6 +5,9 @@ import numpy as np
 from pathlens_gnn.evaluation.ranking import (
     filtered_per_drug_ranking,
     filtered_per_drug_ranking_from_scores,
+    hits_curve,
+    query_ranks_from_scores,
+    ranking_report_from_ranks,
 )
 
 
@@ -37,3 +40,30 @@ def test_filtered_ranking_from_score_matrix_matches_pair_scorer() -> None:
     assert from_matrix.mrr == from_pairs.mrr
     assert from_matrix.hits_at_10 == from_pairs.hits_at_10
     assert from_matrix.hits_at_50 == from_pairs.hits_at_50
+
+
+def test_query_ranks_and_hits_curve_match_filtered_report() -> None:
+    positives = np.asarray([[0, 1], [1, 0]], dtype=np.int64)
+    scores = np.asarray(
+        [
+            [0.2, 0.9, 0.1],
+            [0.8, 0.3, 0.4],
+        ],
+        dtype=np.float64,
+    )
+    known_by_drug = {0: frozenset({1}), 1: frozenset({0})}
+    ranks = query_ranks_from_scores(
+        positives,
+        scores=scores,
+        known_by_drug=known_by_drug,
+    )
+    report = ranking_report_from_ranks(ranks)
+    from_scores = filtered_per_drug_ranking_from_scores(
+        positives,
+        scores=scores,
+        known_by_drug=known_by_drug,
+    )
+    assert ranks.tolist() == [1, 1]
+    assert report.mrr == from_scores.mrr
+    assert hits_curve(ranks)["hits_at_1"] == 1.0
+    assert hits_curve(ranks)["hits_at_10"] == 1.0
