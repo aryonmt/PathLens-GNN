@@ -54,7 +54,16 @@ session, add that output through Kaggle's **Add Input** panel and set
 `RESUME_ARCHIVE` to the resulting path, for example:
 
 ```python
-RESUME_ARCHIVE = "/kaggle/input/pathlens-registered-output/pathlens-stage-output.zip"
+RESUME_ARCHIVE = "/kaggle/input/pathlens-stage-output-9/pathlens-stage-output.zip"
+```
+
+Use the ZIP **file**, not the dataset folder and not a website path like
+`/kaggle/input/datasets/<username>/...`. List files with:
+
+```python
+from pathlib import Path
+for path in Path("/kaggle/input").rglob("*"):
+    print(path)
 ```
 
 The notebook validates ZIP paths before extraction. Registered experiments,

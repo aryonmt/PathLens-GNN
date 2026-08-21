@@ -85,6 +85,38 @@ def test_restore_output_archive_extracts_valid_files(tmp_path: Path) -> None:
     assert (output / "tuning/run_state.json").read_text(encoding="utf-8") == "{}"
 
 
+def test_restore_output_archive_accepts_dataset_directory_containing_zip(tmp_path: Path) -> None:
+    dataset = tmp_path / "pathlens-stage-output-9"
+    dataset.mkdir()
+    archive = dataset / "pathlens-stage-output.zip"
+    with zipfile.ZipFile(archive, "w") as handle:
+        handle.writestr("confirmation/confirmation.json", '{"selected": {}}')
+
+    output = tmp_path / "output"
+    restore_output_archive(dataset, output)
+    restored = (output / "confirmation/confirmation.json").read_text(encoding="utf-8")
+    assert restored == '{"selected": {}}'
+
+
+def test_restore_output_archive_copies_extracted_stage_directory(tmp_path: Path) -> None:
+    dataset = tmp_path / "extracted"
+    (dataset / "confirmation").mkdir(parents=True)
+    (dataset / "confirmation" / "confirmation.json").write_text("{}", encoding="utf-8")
+    (dataset / "stage-confirmation.json").write_text("{}", encoding="utf-8")
+
+    output = tmp_path / "output"
+    restore_output_archive(dataset, output)
+    assert (output / "confirmation/confirmation.json").read_text(encoding="utf-8") == "{}"
+    assert (output / "stage-confirmation.json").read_text(encoding="utf-8") == "{}"
+
+
+def test_restore_output_archive_rejects_empty_directory(tmp_path: Path) -> None:
+    dataset = tmp_path / "empty"
+    dataset.mkdir()
+    with pytest.raises(FileNotFoundError, match="directory"):
+        restore_output_archive(dataset, tmp_path / "output")
+
+
 def test_final_evaluation_requires_token_and_is_one_time(tmp_path: Path) -> None:
     output = tmp_path / "final-evaluation.json"
     with pytest.raises(PermissionError, match="explicit one-time token"):
