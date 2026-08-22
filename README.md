@@ -1,65 +1,41 @@
 # PathLens-GNN
 
-PathLens-GNN is a leakage-aware, path-aware graph learning system for transductive
-drug-target interaction (DTI) ranking on BioSNAP. This repository is a research
-codebase. It is not a product, web application, or clinical tool.
+Comparative, leakage-safe drug–target ranking on BioSNAP. This is a research
+codebase. It is not a product or a clinical tool.
 
-> PathLens scores are research-prioritization signals. They are not validated
-> biological interactions, medical advice, or clinical probabilities.
+> Scores are research-prioritization signals, not biological probabilities.
 
-## Status
+## Where to look
 
-The repository contains the canonical BioSNAP DTI pipeline, sparse three-channel
-model, registered baselines and ablations, and a staged Kaggle workflow
-(`smoke` → `registered` → `confirmation` → `freeze` → `report` → `final`, with
-optional `tuning` before confirmation). `report` writes validation plot
-artifacts and does not open the sealed test.
+| Path | What it is |
+|---|---|
+| [`docs/STATUS.md`](docs/STATUS.md) | Scoreboard: every method, status, last run |
+| [`methods/<id>/`](methods/) | Definition of one heuristic or model |
+| [`runs/biosnap-dti-v2/`](runs/biosnap-dti-v2/) | Artifacts of actual runs |
+| [`src/pathlens/`](src/pathlens/) | Shared data, eval, and trainers |
+| [`kaggle/`](kaggle/) | One notebook; set `METHOD` |
+| [`legacy1/`](legacy1/) | Original SkipGNN clone (gitignored) |
+| [`legacy2/`](legacy2/) | Frozen PathLens campaigns v1–v2 |
 
-A validation-selected configuration is frozen on campaign v1 (split seed 13).
-That sealed test was opened once and must not be used for further selection.
-Campaign v2 (split seed 41) is the current sealed ranking-loss campaign.
-The frozen v2 checkpoint is the confirmed `pathlens_ranking.yaml` seed-13 run.
+Campaign `biosnap-dti-v2` uses split seed 41. The test set is sealed.
 
-The archived SkipGNN repository remains locally under `legacy/` and is
-intentionally excluded from Git.
+## Phase 1 methods
+
+Heuristics: `degree`, `resource_allocation`, `three_hop`.
+
+Train here: `skipgnn` (BCE), then `gcn` and `graphsage`. Optional: `gat`, `nbfnet`.
+
+Import, do not retrain: `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`, `pathlens_ranking`.
+
+Default loss is BCE 1:1. Only `pathlens_ranking` uses sampled softmax.
 
 ## Quick start
 
 ```bash
-uv sync --extra dev --extra train --frozen
-uv run ruff check .
-uv run mypy src
+uv sync --extra dev --frozen
+uv run ruff check src tests methods
 uv run pytest
 ```
 
-Prepare the canonical dataset from a local BioSNAP TSV:
-
-```bash
-uv run pathlens prepare-data --source path/to/ChG-Miner_miner-chem-gene.tsv --seed 41
-```
-
-Training and the sealed evaluation run on Kaggle. See
-[`kaggle/README.md`](kaggle/README.md) and
-[`kaggle/pathlens_training.ipynb`](kaggle/pathlens_training.ipynb). The notebook
-defaults to a three-epoch `smoke` stage, so Save & Run All cannot tune or open
-the test set unless an operator changes `STAGE`.
-
-## Documentation
-
-- [Project charter](docs/decisions/PROJECT_CHARTER.md)
-- [Legacy audit](docs/research/LEGACY_AUDIT.md)
-- [Research specification](docs/research/RESEARCH_SPEC.md)
-- [Evaluation protocol](docs/research/EVALUATION_PROTOCOL.md)
-- [Literature and attribution](docs/research/LITERATURE_REVIEW.md)
-- [Kaggle runbook](kaggle/README.md)
-
-## Stack
-
-Python 3.11/3.12, PyTorch (training extra), sparse SciPy operators, and
-scikit-learn metrics. GPU training is intended for Kaggle.
-
-## License and provenance
-
-Code is licensed under BSD-3-Clause. See [NOTICE](NOTICE) for upstream SkipGNN
-and dataset attribution. Dataset terms remain those of their respective
-providers.
+Training runs on Kaggle GPU (Tesla T4). Use two processes on `cuda:0` and `cuda:1`
+for two methods; do not DataParallel a single small graph.

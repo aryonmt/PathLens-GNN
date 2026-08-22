@@ -1,0 +1,6 @@
+schema_version: "1.0"
+method: pathlens_ranking
+campaign: biosnap-dti-v2
+split_seed: 41
+loss: sampled softmax / InfoNCE (64 negatives, 25% hard mix)
+device: cuda

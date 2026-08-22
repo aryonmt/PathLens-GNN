@@ -1,0 +1,77 @@
+# Archived: PathLens-GNN campaigns v1 and v2
+
+This directory is a frozen snapshot of the previous PathLens-GNN research tree.
+Do not train from here. The active comparison lives at the repository root
+(`methods/`, `runs/`, `docs/STATUS.md`). The original SkipGNN clone is `legacy1/`.
+
+Campaign v2 BioSNAP DTI (split seed 41) has a **sealed test**. Do not open it
+from this archive. The last validation table is in the local Kaggle ZIP
+`outputs-kaggle/kaggle-stages/pathlens-stage-output-v2-report.zip`.
+
+---
+
+# PathLens-GNN
+
+PathLens-GNN is a leakage-aware, path-aware graph learning system for transductive
+drug-target interaction (DTI) ranking on BioSNAP. This repository is a research
+codebase. It is not a product, web application, or clinical tool.
+
+> PathLens scores are research-prioritization signals. They are not validated
+> biological interactions, medical advice, or clinical probabilities.
+
+## Status
+
+The repository contains the canonical BioSNAP DTI pipeline, sparse three-channel
+model, registered baselines and ablations, and a staged Kaggle workflow
+(`smoke` → `registered` → `confirmation` → `freeze` → `report` → `final`, with
+optional `tuning` before confirmation). `report` writes validation plot
+artifacts and does not open the sealed test.
+
+A validation-selected configuration is frozen on campaign v1 (split seed 13).
+That sealed test was opened once and must not be used for further selection.
+Campaign v2 (split seed 41) is the current sealed ranking-loss campaign.
+The frozen v2 checkpoint is the confirmed `pathlens_ranking.yaml` seed-13 run.
+
+The archived SkipGNN repository remains locally under `legacy/` and is
+intentionally excluded from Git.
+
+## Quick start
+
+```bash
+uv sync --extra dev --extra train --frozen
+uv run ruff check .
+uv run mypy src
+uv run pytest
+```
+
+Prepare the canonical dataset from a local BioSNAP TSV:
+
+```bash
+uv run pathlens prepare-data --source path/to/ChG-Miner_miner-chem-gene.tsv --seed 41
+```
+
+Training and the sealed evaluation run on Kaggle. See
+[`kaggle/README.md`](kaggle/README.md) and
+[`kaggle/pathlens_training.ipynb`](kaggle/pathlens_training.ipynb). The notebook
+defaults to a three-epoch `smoke` stage, so Save & Run All cannot tune or open
+the test set unless an operator changes `STAGE`.
+
+## Documentation
+
+- [Project charter](docs/decisions/PROJECT_CHARTER.md)
+- [Legacy audit](docs/research/LEGACY_AUDIT.md)
+- [Research specification](docs/research/RESEARCH_SPEC.md)
+- [Evaluation protocol](docs/research/EVALUATION_PROTOCOL.md)
+- [Literature and attribution](docs/research/LITERATURE_REVIEW.md)
+- [Kaggle runbook](kaggle/README.md)
+
+## Stack
+
+Python 3.11/3.12, PyTorch (training extra), sparse SciPy operators, and
+scikit-learn metrics. GPU training is intended for Kaggle.
+
+## License and provenance
+
+Code is licensed under BSD-3-Clause. See [NOTICE](NOTICE) for upstream SkipGNN
+and dataset attribution. Dataset terms remain those of their respective
+providers.

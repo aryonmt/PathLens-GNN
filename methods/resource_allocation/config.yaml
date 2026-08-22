@@ -1,0 +1,6 @@
+schema_version: "1.0"
+method: resource_allocation
+campaign: biosnap-dti-v2
+split_seed: 41
+loss: none
+device: cuda

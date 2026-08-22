@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pathlens-gnn"
-version = "0.2.0"
-description = "Leakage-safe comparative DTI ranking on BioSNAP"
+version = "0.1.0"
+description = "Leakage-aware path-aware graph learning for transductive drug-target interaction ranking"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = { file = "LICENSE" }
@@ -15,6 +15,7 @@ dependencies = [
   "pyyaml>=6,<7",
   "scikit-learn>=1.6,<2",
   "scipy>=1.15,<2",
+  "typer>=0.16,<1",
 ]
 
 [project.optional-dependencies]
@@ -26,8 +27,11 @@ dev = [
   "ruff>=0.12,<1",
 ]
 
+[project.scripts]
+pathlens = "pathlens_gnn.cli:app"
+
 [tool.hatch.build.targets.wheel]
-packages = ["src/pathlens"]
+packages = ["src/pathlens_gnn"]
 
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers --basetemp=.pytest_tmp"
@@ -36,7 +40,6 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
@@ -44,7 +47,15 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-packages = ["pathlens"]
+packages = ["pathlens_gnn"]
+
+[[tool.mypy.overrides]]
+module = ["pathlens_gnn.model.*", "pathlens_gnn.training.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*"]
+ignore_missing_imports = true
 
 [tool.coverage.run]
-source = ["pathlens"]
+source = ["pathlens_gnn"]

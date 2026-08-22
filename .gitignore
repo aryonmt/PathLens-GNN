@@ -1,5 +1,5 @@
-# Archived original repository, including its nested Git history.
-legacy/
+# Archived original SkipGNN repository, including its nested Git history.
+legacy1/
 
 # Python
 __pycache__/
@@ -26,16 +26,22 @@ env/
 # Notebooks
 .ipynb_checkpoints/
 
-# Local experiment outputs (never commit)
+# Local experiment outputs (never commit weights or raw dumps)
 outputs/
+legacy2/outputs-kaggle/
+legacy2/local-runs/
+legacy2/data/
 checkpoints/
-runs/
 wandb/
 mlruns/
 *.pt
 *.pth
 *.ckpt
 *.onnx
+runs/**/*.pt
+runs/**/*.pth
+runs/**/*.ckpt
+runs/**/*.npz
 
 # Downloaded and generated data
 data/raw/

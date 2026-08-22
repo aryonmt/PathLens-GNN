@@ -1,0 +1,14 @@
+# Documentation Index
+
+The documentation is split by decision boundary so that Issues and pull requests can link to stable acceptance criteria.
+
+| Area | Source of truth |
+|---|---|
+| Intent and scope | `decisions/PROJECT_CHARTER.md` |
+| Legacy defects | `research/LEGACY_AUDIT.md` |
+| Model definition | `research/RESEARCH_SPEC.md` |
+| Split, metrics, confirmation | `research/EVALUATION_PROTOCOL.md` |
+| Literature and attribution | `research/LITERATURE_REVIEW.md` |
+| Kaggle execution | `../kaggle/README.md` |
+
+`PROJECT_MEMORY.md` is a session index, not a duplicate specification.
