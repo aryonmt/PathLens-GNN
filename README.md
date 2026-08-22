@@ -25,11 +25,13 @@ Heuristics: `degree`, `resource_allocation`, `three_hop`.
 
 Train here: `skipgnn` (BCE), then `gcn` and `graphsage`. Optional: `gat`, `nbfnet`.
 
-Import, do not retrain: `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`, `pathlens_ranking`.
+Import, do not retrain (done): `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`, `pathlens_ranking`.
 
 Default loss is BCE 1:1. Only `pathlens_ranking` uses sampled softmax.
 
 ## Quick start
+
+Local tests do not need CUDA or BioSNAP:
 
 ```bash
 uv sync --extra dev --frozen
@@ -37,5 +39,15 @@ uv run ruff check src tests methods
 uv run pytest
 ```
 
-Training runs on Kaggle GPU (Tesla T4). Use two processes on `cuda:0` and `cuda:1`
-for two methods; do not DataParallel a single small graph.
+```bash
+python -m pathlens import-v2
+```
+
+Import reads the local v2 report ZIP, writes run cards under `runs/biosnap-dti-v2/<method>/imported/`, and does not open the test. Checkpoints are copied locally and gitignored.
+
+Heuristic scoring and training run on Kaggle GPU (Tesla T4), one method at a time.
+The notebook default is `three_hop` / `STAGE=eval`. Push the branch before the kernel clones GitHub:
+
+```bash
+python -m pathlens run --method three_hop --stage eval --device cuda:0
+```

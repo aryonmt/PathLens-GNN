@@ -17,6 +17,9 @@ dependencies = [
   "scipy>=1.15,<2",
 ]
 
+[project.scripts]
+pathlens = "pathlens.runtime.cli:main"
+
 [project.optional-dependencies]
 train = ["torch>=2.7,<3"]
 dev = [
@@ -30,13 +33,15 @@ dev = [
 packages = ["src/pathlens"]
 
 [tool.pytest.ini_options]
-addopts = "-q --strict-markers --basetemp=.pytest_tmp"
+addopts = "-q --strict-markers"
+cache_dir = ".cache/pytest"
 testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 src = ["src", "tests"]
+cache-dir = ".cache/ruff"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
@@ -45,6 +50,8 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 python_version = "3.12"
 strict = true
 packages = ["pathlens"]
+cache_dir = ".cache/mypy"
 
-[tool.coverage.run]
-source = ["pathlens"]
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "matplotlib.*", "yaml", "torch"]
+ignore_missing_imports = true

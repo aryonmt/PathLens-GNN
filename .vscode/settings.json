@@ -1,0 +1,26 @@
+{
+  "files.exclude": {
+    "**/.cache": true,
+    "**/.mypy_cache": true,
+    "**/.pytest_cache": true,
+    "**/.pytest_tmp": true,
+    "**/.pytest_tmp_bootstrap2": true,
+    "**/.pytest_tmp_bootstrap3": true,
+    "**/.pytest_tmp_logging": true,
+    "**/.ruff_cache": true,
+    "**/.uv-cache": true,
+    "**/.uv-cache-bootstrap": true,
+    "**/.venv": true,
+    "**/.coverage": true,
+    "**/__pycache__": true
+  },
+  "search.exclude": {
+    "**/.cache": true,
+    "**/.mypy_cache": true,
+    "**/.pytest_cache": true,
+    "**/.pytest_tmp*": true,
+    "**/.ruff_cache": true,
+    "**/.uv-cache*": true,
+    "**/.venv": true
+  }
+}

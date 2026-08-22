@@ -1,0 +1,13 @@
+{
+  "method": "s1_s2",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "retrain": false,
+  "source_archive": "pathlens-stage-output-v2-report.zip",
+  "source_archive_sha256": "f972f56383009d661d99392b1af825cd93cbfdba9d1c1d83e55b22821e7607f5",
+  "legacy_report_name": "s1_s2_weighted",
+  "checkpoint_member": "registered/s1_s2_weighted/checkpoint.pt",
+  "checkpoint_sha256": "6d2eb356f000296511ea9ed597a4200c9feecdd0d8acf2590ad25470d8f4bb79",
+  "freeze_record": null,
+  "confirmation": null
+}

@@ -1,0 +1,55 @@
+{
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "source_archive": "pathlens-stage-output-v2-report.zip",
+  "source_archive_sha256": "f972f56383009d661d99392b1af825cd93cbfdba9d1c1d83e55b22821e7607f5",
+  "split": "validation",
+  "test_sealed": true,
+  "methods": {
+    "one_hop": {
+      "legacy_name": "one_hop",
+      "checkpoint_sha256": "bc7a4d503ddeab000085dd783288336de3dab7f1b01eef8bfd34ad90b9178e82",
+      "hard_auprc": 0.7877230637099433,
+      "mrr": 0.10269569670681825,
+      "hits_at_10": 0.19220607661822986,
+      "ndcg_at_10": 0.11403045920063194,
+      "output_dir": "runs/biosnap-dti-v2/one_hop/imported"
+    },
+    "s1_s2": {
+      "legacy_name": "s1_s2_weighted",
+      "checkpoint_sha256": "6d2eb356f000296511ea9ed597a4200c9feecdd0d8acf2590ad25470d8f4bb79",
+      "hard_auprc": 0.8252763611349744,
+      "mrr": 0.1431382516300505,
+      "hits_at_10": 0.22721268163804492,
+      "ndcg_at_10": 0.15278518728491552,
+      "output_dir": "runs/biosnap-dti-v2/s1_s2/imported"
+    },
+    "s1_s2_s3_fixed": {
+      "legacy_name": "s1_s2_s3_fixed",
+      "checkpoint_sha256": "74544ab85b394016bb4c60f8888fb5e5f9389bb52a59ca19435267257f50ef10",
+      "hard_auprc": 0.8258232691873154,
+      "mrr": 0.1364997976774982,
+      "hits_at_10": 0.2239101717305152,
+      "ndcg_at_10": 0.1466928940665565,
+      "output_dir": "runs/biosnap-dti-v2/s1_s2_s3_fixed/imported"
+    },
+    "pathlens_bce": {
+      "legacy_name": "full_adaptive_fusion",
+      "checkpoint_sha256": "aef8a3eae41eafd656b8ad41891460afa54f3372ca4176e25f091002fb98ae36",
+      "hard_auprc": 0.8524799634489428,
+      "mrr": 0.1597933405491032,
+      "hits_at_10": 0.31704095112285335,
+      "ndcg_at_10": 0.18730980491369267,
+      "output_dir": "runs/biosnap-dti-v2/pathlens_bce/imported"
+    },
+    "pathlens_ranking": {
+      "legacy_name": "full_adaptive_ranking",
+      "checkpoint_sha256": "646700d456ba4cb0de795e7067e1830e8f18598b97fe5cc89d195d631d356586",
+      "hard_auprc": 0.8676768538737114,
+      "mrr": 0.3753022508508477,
+      "hits_at_10": 0.49207397622192867,
+      "ndcg_at_10": 0.39723988722013637,
+      "output_dir": "runs/biosnap-dti-v2/pathlens_ranking/imported"
+    }
+  }
+}

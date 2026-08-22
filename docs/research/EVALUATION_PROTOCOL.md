@@ -21,6 +21,26 @@ All methods report the same suite on validation until freeze:
 - Degree slices
 - Seed mean ± SD when multiple seeds exist; AUPRC bootstrap without an inner F1 search
 
+## Figures
+
+Eval means this figure set, not a single scalar. Plots are written on Kaggle
+into `runs/biosnap-dti-v2/figures/` from `scripts/plot_validation_report.py`.
+Do not generate them on the laptop. Matplotlib is already on Kaggle; it is not
+a local dependency.
+
+- `pr_hard.png` / `pr_uniform.png` — precision–recall on each negative bank
+- `roc_hard.png` — ROC on hard negatives
+- `hits_at_k.png` — filtered Hits@K
+- `mrr_and_hard_auprc.png` — MRR vs hard AUPRC bars
+- `degree_slices_hard.png` — hard AUPRC by pair-degree tertile
+
+Heuristics (`degree`, `resource_allocation`, `three_hop`) build the full
+drug×protein score matrix with dense GEMM on the assigned GPU. They use context
+edges only. The laptop path is NumPy (`--device cpu`) so CI does not need PyTorch.
+
+Learning curves and gate-weight bars are added per trained method when history
+exists. Test figures use the same names under a `test/` folder after freeze.
+
 ## Freeze
 
 Select on validation filtered MRR. Tie-break: validation hard AUPRC. Freeze only

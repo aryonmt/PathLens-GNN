@@ -9,4 +9,9 @@ Source SHA-256:
 
 `b54a548bb0b6d7039b5c317bf8251d17233bdc89bc49f477aeb8abddfafc9e6c`
 
-Campaign `biosnap-dti-v2` split seed: 41.
+URL:
+
+`https://snap.stanford.edu/biodata/datasets/10002/files/ChG-Miner_miner-chem-gene.tsv.gz`
+
+Campaign `biosnap-dti-v2` split seed: 41. The header row is not an edge. Kaggle
+downloads this file; the laptop does not.

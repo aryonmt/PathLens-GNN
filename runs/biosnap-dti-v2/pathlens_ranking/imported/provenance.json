@@ -1,0 +1,31 @@
+{
+  "method": "pathlens_ranking",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "retrain": false,
+  "source_archive": "pathlens-stage-output-v2-report.zip",
+  "source_archive_sha256": "f972f56383009d661d99392b1af825cd93cbfdba9d1c1d83e55b22821e7607f5",
+  "legacy_report_name": "full_adaptive_ranking",
+  "checkpoint_member": "confirmation/candidate-0/seed-13/checkpoint.pt",
+  "checkpoint_sha256": "646700d456ba4cb0de795e7067e1830e8f18598b97fe5cc89d195d631d356586",
+  "freeze_record": {
+    "schema_version": "1.0",
+    "checkpoint": "/kaggle/working/output/confirmation/candidate-0/seed-13/checkpoint.pt",
+    "checkpoint_sha256": "646700d456ba4cb0de795e7067e1830e8f18598b97fe5cc89d195d631d356586",
+    "selection_metric": "validation_filtered_mrr",
+    "tie_break": "validation_hard_auprc",
+    "decision": "Registered ranking-loss configuration after multi-seed confirmation; seed 13 is the preregistered evaluation checkpoint",
+    "frozen_at": "2026-08-21T18:34:25.541247+00:00"
+  },
+  "confirmation": {
+    "seeds": [
+      13,
+      29,
+      71
+    ],
+    "mean_validation_filtered_mrr": 0.37301907601361306,
+    "sample_sd_validation_filtered_mrr": 0.002762707014699025,
+    "mean_validation_hard_auprc": 0.8829549399235569,
+    "sample_sd_validation_hard_auprc": 0.013252099218970104
+  }
+}
