@@ -10,6 +10,7 @@ from pathlens import REPO_ROOT
 from pathlens.constants import (
     CAMPAIGN_ID,
     COMBINE_METHODS,
+    DIAGNOSTIC_METHODS,
     FINAL_TEST_TOKEN,
     HEURISTIC_METHODS,
     STAGES,
@@ -95,6 +96,16 @@ def run_stage(
             stage=stage,
             run_dir=run_dir,
         )
+    elif method_id in DIAGNOSTIC_METHODS:
+        from pathlens.runtime.diagnose import run_ranking_diagnostics
+
+        payload = run_ranking_diagnostics(
+            split,
+            device=resolved_device,
+            stage=stage,
+            run_dir=run_dir,
+            repo_root=root,
+        )
     else:
         raise NotImplementedError(
             f"{method_id} has no trainer in this slice. Implemented trainers: "
@@ -119,12 +130,15 @@ def run_stage(
         archive_run_dir(run_dir, archive)
     result["output_dir"] = str(run_dir)
     result["archive"] = None if archive is None else str(archive)
-    print(
-        f"[pathlens] method={method_id} stage={stage} device={resolved_device} "
-        f"mrr={payload['filtered_ranking']['mrr']:.4f} "
-        f"hard_auprc={payload['classification']['hard']['auprc']:.4f}",
-        flush=True,
-    )
+    if payload.get("diagnostic"):
+        _print_diagnostic_summary(method_id, stage, resolved_device, payload)
+    else:
+        print(
+            f"[pathlens] method={method_id} stage={stage} device={resolved_device} "
+            f"mrr={payload['filtered_ranking']['mrr']:.4f} "
+            f"hard_auprc={payload['classification']['hard']['auprc']:.4f}",
+            flush=True,
+        )
     return result
 
 
@@ -284,6 +298,30 @@ def archive_run_dir(run_dir: str | Path, destination: str | Path) -> Path:
         destination.unlink()
     shutil.make_archive(str(destination.with_suffix("")), "zip", root_dir=run_dir)
     return destination
+
+
+def _print_diagnostic_summary(
+    method_id: str,
+    stage: str,
+    device: str,
+    payload: dict[str, Any],
+) -> None:
+    print(
+        f"[pathlens] method={method_id} stage={stage} device={device} "
+        f"diagnostic=1 seconds={payload.get('score_seconds', 0):.1f}",
+        flush=True,
+    )
+    for scored_id, filters in payload.get("methods", {}).items():
+        ranking = filters["all_positive"]["ranking"]
+        print(
+            f"  {scored_id}: strict={ranking['strict_gt']['mrr']:.4f} "
+            f"average={ranking['average']['mrr']:.4f} "
+            f"random={ranking['random']['mrr']:.4f} "
+            f"zero={filters['all_positive']['ties']['fraction_zero_target']:.3f}",
+            flush=True,
+        )
+    for skipped_id, reason in payload.get("skipped", {}).items():
+        print(f"  skipped {skipped_id}: {reason}", flush=True)
 
 
 def _json_default(value: object) -> object:

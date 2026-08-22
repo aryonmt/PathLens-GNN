@@ -104,5 +104,16 @@ so far on hard AUPRC.
 |---|---|---|---|---|---|---|
 | `blend_pathlens_three_hop` | 0.887 | 0.455 | 0.673 | 0.499 | 0.544 | eval T4 `73d5a2a` |
 | `rrf_pathlens_three_hop` | 0.907 | 0.393 | 0.567 | 0.428 | 0.458 | eval T4 `73d5a2a` |
+| `residual_three_hop` | 0.889 | 0.367 | 0.545 | 0.404 | 0.430 | eval T4 `a5506bb` |
 
-`residual_three_hop` is not filed yet.
+`residual_three_hop` is a tiny pair MLP added to frozen 3-hop. GPU time was
+10.4s for 18 epochs (patience 8 after best epoch 10), the same order as
+official `skipgnn` (10.3s / 15 epochs) in this repo. Epoch 1 MRR was already
+0.366, below frozen 3-hop 0.455: random residual noise scrambled the
+heuristic ranks and training barely moved the loss (4.096 → 4.064). This is
+a negative result, not a truncated run. Campaign v2 PathLens used up to 300
+epochs; that is the 4–5 hour job, not these trainers.
+
+`ranking_diagnostics` is not a freeze candidate. It rescores the same
+validation split under average/random ties and a no-test filter. Filed cards
+keep `strict_gt` + `all_positive` until that audit is read.

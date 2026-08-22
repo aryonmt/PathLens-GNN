@@ -19,6 +19,7 @@ REQUIRED = {
     "blend_pathlens_three_hop",
     "rrf_pathlens_three_hop",
     "residual_three_hop",
+    "ranking_diagnostics",
     "gat",
     "nbfnet",
 }
@@ -181,7 +182,7 @@ def test_kaggle_drop_layout_exists() -> None:
     for method_id in ("skipgnn", "gcn", "graphsage", "residual_three_hop"):
         assert (campaign / method_id / "train").is_dir()
         assert (campaign / method_id / "eval").is_dir()
-    for method_id in ("blend_pathlens_three_hop", "rrf_pathlens_three_hop"):
+    for method_id in ("blend_pathlens_three_hop", "rrf_pathlens_three_hop", "ranking_diagnostics"):
         assert (campaign / method_id / "eval").is_dir()
     figures_readme = (campaign / "figures" / "README.md").read_text(encoding="utf-8")
     for name in FIGURE_NAMES:
@@ -218,14 +219,36 @@ def test_blend_and_rrf_eval_cards_are_filed() -> None:
     assert rrf["combine"]["k"] == 60
 
 
-def test_notebook_defaults_to_residual_eval() -> None:
+def test_residual_eval_card_is_filed() -> None:
+    import json
+
+    campaign = REPO_ROOT / "runs" / "biosnap-dti-v2"
+    payload = json.loads(
+        (campaign / "residual_three_hop" / "eval" / "metrics.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert payload["method"] == "residual_three_hop"
+    assert payload["stage"] == "eval"
+    assert "test" not in payload
+    assert payload["training"]["selection"] == "validation_filtered_mrr"
+    assert payload["training"]["best_epoch"] == 10
+    assert len(payload["training"]["history"]) == 18
+    assert (campaign / "residual_three_hop" / "eval" / "provenance.json").is_file()
+    assert not (campaign / "residual_three_hop" / "eval" / "model.pt").exists()
+    status = (REPO_ROOT / "docs" / "STATUS.md").read_text(encoding="utf-8")
+    assert "| `residual_three_hop` |" in status
+    assert "done" in status.split("`residual_three_hop`")[1].split("\n")[0]
+
+
+def test_notebook_defaults_to_ranking_diagnostics_eval() -> None:
     import json
 
     notebook = json.loads(
         (REPO_ROOT / "kaggle" / "pathlens_training.ipynb").read_text(encoding="utf-8")
     )
     source = "".join(notebook["cells"][1]["source"])
-    assert 'METHOD = "residual_three_hop"' in source
+    assert 'METHOD = "ranking_diagnostics"' in source
     assert 'STAGE = "eval"' in source
     assert 'FINAL_TEST_TOKEN = ""' in source
     assert "OPEN_SEALED_TEST_ONCE" not in source

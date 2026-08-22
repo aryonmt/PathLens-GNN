@@ -1,20 +1,19 @@
 # Kaggle
 
 One notebook: `pathlens_training.ipynb`. Set `METHOD` to a folder name under
-`methods/`. The committed default is `residual_three_hop` with `STAGE=eval`.
-Official `skipgnn`, `gcn`, `graphsage`, `blend_pathlens_three_hop`, and
-`rrf_pathlens_three_hop` are already filed — do not rerun them. The frozen
-PathLens checkpoint is in the clone. `STAGE=final` is refused until freeze.
+`methods/`. The committed default is `ranking_diagnostics` with `STAGE=eval`.
+That rescores heuristics (and frozen PathLens) on GPU; it is not a freeze
+candidate. Do not rerun filed cards. `STAGE=final` is refused until freeze.
 `gat` and `nbfnet` stay deferred.
 
 Internet must be on so the kernel can clone the branch **from GitHub** and
 download BioSNAP. Push `research/ranking-loss` before you run.
 
-| Stage | Heuristic / blend / RRF | `skipgnn` / `gcn` / `graphsage` / `residual_three_hop` |
+| Stage | Heuristic / blend / RRF / `ranking_diagnostics` | `skipgnn` / `gcn` / `graphsage` / `residual_three_hop` |
 |---|---|---|
-| `smoke` | GPU score matrix, validation MRR + AUPRC | 2-epoch train + validation MRR/AUPRC |
+| `smoke` | GPU score matrix, validation MRR + AUPRC; diagnostics skip PathLens | 2-epoch train + validation MRR/AUPRC |
 | `train` | refused | full train, checkpoint, validation metrics |
-| `eval` | full validation suite (curves, slices, bootstrap) | full train + full validation suite |
+| `eval` | full validation suite, or the tie/filter audit | full train + full validation suite |
 | `final` | refused; v2 test stays sealed | refused |
 
 Imported PathLens cards live under `runs/` from a local `import-v2`. Do not retrain them on Kaggle. The last notebook cell plots every method that has `eval/`, `imported/`, or `smoke/` metrics and rebuilds `pathlens-stage-output.zip` so the PNGs are inside that archive.
@@ -52,15 +51,27 @@ File the download using [`runs/README.md`](../runs/README.md): raw ZIP under
 `outputs/kaggle/blend-eval/`. Blend selected `α=1` (MRR 0.455, hard AUPRC
 0.887). RRF MRR 0.393, hard AUPRC 0.907. Do not rerun.
 
-## Operator: `residual_three_hop` eval
+## Filed: `residual_three_hop` eval
 
-1. Confirm `research/ranking-loss` is pushed after this filing.
+`runs/biosnap-dti-v2/residual_three_hop/eval/` from
+`outputs/kaggle/residual-eval/`. Best epoch 10 / stopped 18. Validation MRR
+0.367, hard AUPRC 0.889. GPU train+eval 10.4s — not a truncated PathLens
+v2 job. Loses filtered MRR to `three_hop`. Do not rerun.
+
+No further Phase-1 GPU operator except `ranking_diagnostics`. Do not set
+`STAGE=final`.
+
+## Operator: `ranking_diagnostics` eval
+
+1. Confirm `research/ranking-loss` is pushed.
 2. New kernel. GPU T4. Internet on. No extra Input dataset.
-3. `METHOD="residual_three_hop"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
-   `FINAL_TEST_TOKEN=""`. No extra PathLens ZIP; 3-hop is computed in-session.
-4. Log should show `[residual_three_hop] epoch=... val_mrr=...`. Select on
-   validation filtered MRR. Config: 40 epochs, patience 8.
-5. Do not set `STAGE=final`. Do not rerun blend/RRF.
+3. `METHOD="ranking_diagnostics"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
+   `FINAL_TEST_TOKEN=""`.
+4. Log should show `strict=` / `average=` / `random=` MRR per method, then
+   PathLens scoring on GPU. `STAGE=train` is refused. Do not set `STAGE=final`.
+5. Download `/kaggle/working/pathlens-stage-output.zip`. File `metrics.json`
+   into `runs/biosnap-dti-v2/ranking_diagnostics/eval/`. Optional PNG:
+   `figures/mrr_tie_break.png` stays in that eval folder, not the scoreboard.
 
 ## Filed: `graphsage` eval
 

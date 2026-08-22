@@ -17,7 +17,8 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 | `graphsage` | model | BCE 1:1 | yes | done | eval T4 `4138751` |
 | `blend_pathlens_three_hop` | combine | none | no | done | eval T4 `73d5a2a` |
 | `rrf_pathlens_three_hop` | combine | none | no | done | eval T4 `73d5a2a` |
-| `residual_three_hop` | model | sampled softmax | yes | not_started | — |
+| `residual_three_hop` | model | sampled softmax | yes | done | eval T4 `a5506bb` |
+| `ranking_diagnostics` | diagnostic | none | no | not_started | — |
 | `gat` | model | BCE 1:1 | if hours remain | deferred | — |
 | `nbfnet` | model | TBD | if hours remain | deferred | — |
 
@@ -30,5 +31,6 @@ checkpoints live in-repo under `runs/biosnap-dti-v2/<method>/imported/checkpoint
 overlay. GraphSAGE is Hamilton mean-SAGE (Huang et al. did not report it).
 `resource_allocation` remains the validation MRR leader. Late fusion selected
 `α=1` (pure z-scored 3-hop). RRF raised hard AUPRC and lowered MRR.
-`residual_three_hop` stays `not_started` until its Kaggle card is filed. Test
-stays sealed.
+`residual_three_hop` trained 18 epochs on Tesla T4 (best epoch 10) and lost
+filtered MRR to frozen 3-hop. Next GPU card is `ranking_diagnostics` (tie-break
+and filter audit). `gat` and `nbfnet` stay deferred. Test stays sealed.

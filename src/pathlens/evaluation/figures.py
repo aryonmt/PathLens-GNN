@@ -91,7 +91,9 @@ def _load_runs_directory(root: Path) -> dict[str, Any]:
     models: dict[str, Any] = {}
     for method_dir in sorted(path for path in root.iterdir() if path.is_dir()):
         payload = _load_preferred_metrics(method_dir)
-        if payload is None:
+        if payload is None or payload.get("diagnostic"):
+            continue
+        if "filtered_ranking" not in payload or "classification" not in payload:
             continue
         method_id = str(payload.get("method", method_dir.name))
         models[method_id] = {

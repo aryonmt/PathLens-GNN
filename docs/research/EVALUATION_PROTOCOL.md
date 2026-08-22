@@ -47,5 +47,13 @@ Select on validation filtered MRR. Tie-break: validation hard AUPRC. Freeze only
 if the candidate beats `three_hop` and `skipgnn` on MRR. Otherwise report the
 negative result. Open test at most once after freeze.
 
+Filed ranks use **optimistic** ties: `1 + count(strictly higher scores)` after
+masking other known positives. Exact ties do not move the target down. The
+mask is `all_positive` (the canonical edge list), so test positives are hidden
+as competitors on validation; test arrays are never scored. `ranking_diagnostics`
+reports average-tie and random-tie MRR and a `visible` mask
+(`context ∪ train ∪ val`) as columns beside the filed numbers. It does not
+replace them.
+
 A sigmoid is not a biological probability. Do not compare numbers to Huang et al.
 SkipGNN PR-AUC 0.928 as a win or loss.
