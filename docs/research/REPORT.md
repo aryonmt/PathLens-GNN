@@ -91,3 +91,13 @@ matches uniform AUROC and does not buy filtered MRR.
 
 The v2 ZIP overlay `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
 0.835) is retired as a freeze baseline.
+
+### PathLens × 3-hop mixes (this repo, not yet filed)
+
+Same sealed validation split. Not on the freeze board until cards are filed.
+
+| Method | What it is |
+|---|---|
+| `blend_pathlens_three_hop` | Per-drug z-score mix; `α` chosen on validation MRR |
+| `rrf_pathlens_three_hop` | Reciprocal rank fusion, `k=60` |
+| `residual_three_hop` | `three_hop + f_θ`, sampled softmax, select on MRR |

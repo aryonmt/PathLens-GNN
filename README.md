@@ -23,7 +23,9 @@ Campaign `biosnap-dti-v2` uses split seed 41. The test set is sealed.
 
 Heuristics: `degree`, `resource_allocation`, `three_hop`.
 
-Train here (done): `skipgnn` (BCE), `gcn`, `graphsage`. Optional: `gat`, `nbfnet`.
+Train here (done): `skipgnn` (BCE), `gcn`, `graphsage`. New mixes:
+`blend_pathlens_three_hop`, `rrf_pathlens_three_hop`, `residual_three_hop`.
+Optional: `gat`, `nbfnet`.
 
 Import, do not retrain (done): `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`, `pathlens_ranking`.
 
@@ -46,8 +48,10 @@ python -m pathlens import-v2
 Import reads the local v2 report ZIP, writes run cards under `runs/biosnap-dti-v2/<method>/imported/`, and does not open the test. Checkpoints are copied locally and gitignored.
 
 Heuristic scoring and training run on Kaggle GPU (Tesla T4), one method at a time.
-The notebook default is `graphsage` / `STAGE=eval`. Push the branch before the kernel clones GitHub:
+The notebook default is `blend_pathlens_three_hop` / `STAGE=eval`. Attach the
+v2 report ZIP so the kernel can load the frozen PathLens checkpoint. Push the
+branch before the kernel clones GitHub:
 
 ```bash
-python -m pathlens run --method graphsage --stage eval --device cuda:0
+python -m pathlens run --method blend_pathlens_three_hop --stage eval --device cuda:0
 ```

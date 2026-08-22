@@ -1,0 +1,18 @@
+schema_version: "1.0"
+method: residual_three_hop
+campaign: biosnap-dti-v2
+split_seed: 41
+loss: sampled softmax
+device: cuda
+seed: 13
+learning_rate: 0.001
+weight_decay: 0.0001
+max_epochs: 40
+patience: 8
+dim: 32
+hidden: 64
+dropout: 0.1
+num_negatives: 64
+hard_fraction: 0.25
+temperature: 1.0
+base: three_hop

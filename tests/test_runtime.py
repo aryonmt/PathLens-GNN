@@ -196,6 +196,71 @@ def test_graphsage_smoke_writes_metrics_and_skips_test(tmp_path: Path) -> None:
     assert result["training"]["epochs"] == 2
 
 
+def test_residual_smoke_writes_metrics_and_skips_test(tmp_path: Path) -> None:
+    pytest.importorskip("torch")
+    processed = _prepared(tmp_path)
+    result = run_stage(
+        "residual_three_hop",
+        "smoke",
+        device="cpu",
+        processed_dir=processed,
+        output_root=tmp_path / "runs",
+        download=False,
+        strict_identity=False,
+        write_archive=False,
+    )
+    assert Path(result["output_dir"], "metrics.json").is_file()
+    assert "mrr" in result["filtered_ranking"]
+    assert "test" not in result
+    assert result["training"]["epochs"] == 2
+    assert result["training"]["selection"] == "validation_filtered_mrr"
+
+
+def test_blend_writes_rrf_sibling_from_injected_scores(tmp_path: Path) -> None:
+    processed = _prepared(tmp_path)
+    hop = np.zeros((4, 4), dtype=np.float64)
+    hop[1, 1] = 5.0
+    pathlens = np.zeros((4, 4), dtype=np.float64)
+    pathlens[1, 3] = 5.0
+    result = run_stage(
+        "blend_pathlens_three_hop",
+        "smoke",
+        device="cpu",
+        processed_dir=processed,
+        output_root=tmp_path / "runs",
+        download=False,
+        strict_identity=False,
+        write_archive=False,
+        hop_scores=hop,
+        pathlens_scores=pathlens,
+    )
+    assert result["method"] == "blend_pathlens_three_hop"
+    assert "test" not in result
+    assert result["combine"]["alpha"] >= 0.5
+    by_alpha = {row["alpha"]: row["mrr"] for row in result["combine"]["sweep"]}
+    assert by_alpha[1.0] > by_alpha[0.0]
+    rrf = tmp_path / "runs" / "rrf_pathlens_three_hop" / "smoke" / "metrics.json"
+    assert rrf.is_file()
+    assert json.loads(rrf.read_text(encoding="utf-8"))["method"] == "rrf_pathlens_three_hop"
+
+
+def test_combine_train_is_refused(tmp_path: Path) -> None:
+    processed = _prepared(tmp_path)
+    with pytest.raises(ValueError, match="frozen-score mix"):
+        run_stage(
+            "blend_pathlens_three_hop",
+            "train",
+            device="cpu",
+            processed_dir=processed,
+            output_root=tmp_path / "runs",
+            download=False,
+            strict_identity=False,
+            write_archive=False,
+            hop_scores=np.zeros((4, 4)),
+            pathlens_scores=np.zeros((4, 4)),
+        )
+
+
 def test_gat_trainer_is_not_implemented_yet(tmp_path: Path) -> None:
     processed = _prepared(tmp_path)
     with pytest.raises(NotImplementedError, match="no trainer"):

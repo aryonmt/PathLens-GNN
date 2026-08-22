@@ -35,6 +35,9 @@ DISPLAY_NAMES = {
     "s1_s2_s3_fixed": "S1+S2+S3",
     "gcn": "GCN",
     "graphsage": "GraphSAGE",
+    "blend_pathlens_three_hop": "Blend 3-hop+PathLens",
+    "rrf_pathlens_three_hop": "RRF 3-hop+PathLens",
+    "residual_three_hop": "Residual 3-hop",
     "gat": "GAT",
     "nbfnet": "NBFNet",
 }

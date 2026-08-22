@@ -16,6 +16,9 @@ REQUIRED = {
     "pathlens_ranking",
     "gcn",
     "graphsage",
+    "blend_pathlens_three_hop",
+    "rrf_pathlens_three_hop",
+    "residual_three_hop",
     "gat",
     "nbfnet",
 }
@@ -161,22 +164,24 @@ def test_kaggle_drop_layout_exists() -> None:
     assert (campaign / "figures" / "test").is_dir()
     for method_id in ("degree", "resource_allocation", "three_hop"):
         assert (campaign / method_id / "eval").is_dir()
-    for method_id in ("skipgnn", "gcn", "graphsage"):
+    for method_id in ("skipgnn", "gcn", "graphsage", "residual_three_hop"):
         assert (campaign / method_id / "train").is_dir()
+        assert (campaign / method_id / "eval").is_dir()
+    for method_id in ("blend_pathlens_three_hop", "rrf_pathlens_three_hop"):
         assert (campaign / method_id / "eval").is_dir()
     figures_readme = (campaign / "figures" / "README.md").read_text(encoding="utf-8")
     for name in FIGURE_NAMES:
         assert f"`{name}`" in figures_readme
 
 
-def test_notebook_defaults_to_graphsage_eval() -> None:
+def test_notebook_defaults_to_blend_eval() -> None:
     import json
 
     notebook = json.loads(
         (REPO_ROOT / "kaggle" / "pathlens_training.ipynb").read_text(encoding="utf-8")
     )
     source = "".join(notebook["cells"][1]["source"])
-    assert 'METHOD = "graphsage"' in source
+    assert 'METHOD = "blend_pathlens_three_hop"' in source
     assert 'STAGE = "eval"' in source
     assert 'FINAL_TEST_TOKEN = ""' in source
     assert "OPEN_SEALED_TEST_ONCE" not in source
@@ -188,3 +193,4 @@ def test_notebook_defaults_to_graphsage_eval() -> None:
     checkout = "".join(notebook["cells"][2]["source"])
     assert 'repository_source = str(REPO / "src")' in checkout
     assert "sys.path.insert(0, repository_source)" in checkout
+    assert "legacy2" in checkout

@@ -15,9 +15,12 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 | `pathlens_ranking` | model | sampled softmax | import | done | freeze `646700d4` |
 | `gcn` | model | BCE 1:1 | yes | done | eval T4 `9fa9913` |
 | `graphsage` | model | BCE 1:1 | yes | done | eval T4 `4138751` |
+| `blend_pathlens_three_hop` | combine | none | no | not_started | — |
+| `rrf_pathlens_three_hop` | combine | none | no | not_started | — |
+| `residual_three_hop` | model | sampled softmax | yes | not_started | — |
 | `gat` | model | BCE 1:1 | if hours remain | deferred | — |
 | `nbfnet` | model | TBD | if hours remain | deferred | — |
 
 Status values: `not_started`, `import_pending`, `running`, `done`, `deferred`.
 
-Imported cards are validation-only from `pathlens-stage-output-v2-report.zip`. Weights stay local and gitignored. Official `skipgnn` (`56970fe`), `gcn` (`9fa9913`), and `graphsage` (`4138751`) are in-repo GPU cards, not the v2 `binary_skipgnn` overlay. GraphSAGE is Hamilton mean-SAGE (Huang et al. did not report it). `resource_allocation` remains the validation MRR leader.
+Imported cards are validation-only from `pathlens-stage-output-v2-report.zip`. Weights stay local and gitignored. Official `skipgnn` (`56970fe`), `gcn` (`9fa9913`), and `graphsage` (`4138751`) are in-repo GPU cards, not the v2 `binary_skipgnn` overlay. GraphSAGE is Hamilton mean-SAGE (Huang et al. did not report it). `resource_allocation` remains the validation MRR leader. The three PathLens×3-hop mixes (`blend_pathlens_three_hop`, `rrf_pathlens_three_hop`, `residual_three_hop`) are new validation experiments. They stay `not_started` until a Kaggle card is filed. Test stays sealed.

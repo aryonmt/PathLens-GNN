@@ -9,6 +9,7 @@ from typing import Any
 from pathlens import REPO_ROOT
 from pathlens.constants import (
     CAMPAIGN_ID,
+    COMBINE_METHODS,
     FINAL_TEST_TOKEN,
     HEURISTIC_METHODS,
     STAGES,
@@ -37,6 +38,9 @@ def run_stage(
     final_test_token: str = "",
     write_archive: bool = True,
     archive_path: str | Path | None = None,
+    hop_scores: Any = None,
+    pathlens_scores: Any = None,
+    pathlens_checkpoint: str | Path | None = None,
 ) -> dict[str, Any]:
     if stage not in STAGES:
         raise ValueError(f"Unknown stage {stage!r}. Expected one of {STAGES}")
@@ -59,7 +63,21 @@ def run_stage(
     run_dir = Path(output_root or root / "runs" / CAMPAIGN_ID) / method_id / stage
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    if method_id in HEURISTIC_METHODS:
+    if method_id in COMBINE_METHODS:
+        if stage == "train":
+            raise ValueError(f"{method_id} is a frozen-score mix; use STAGE=smoke or STAGE=eval")
+        payload = _run_combine(
+            method_id,
+            split,
+            device=resolved_device,
+            stage=stage,
+            campaign_root=run_dir.parent.parent,
+            repo_root=root,
+            hop_scores=hop_scores,
+            pathlens_scores=pathlens_scores,
+            checkpoint=pathlens_checkpoint,
+        )
+    elif method_id in HEURISTIC_METHODS:
         if stage == "train":
             raise ValueError(f"{method_id} is a heuristic; use STAGE=smoke or STAGE=eval")
         payload = _run_heuristic(
@@ -170,7 +188,64 @@ def _run_trained(
             stage=stage,
             run_dir=run_dir,
         )
+    if method_id == "residual_three_hop":
+        from pathlens.training.residual import run_residual_three_hop
+
+        return run_residual_three_hop(
+            split,
+            config,
+            device=device,
+            stage=stage,
+            run_dir=run_dir,
+        )
     raise NotImplementedError(f"{method_id} has no trainer in this slice")
+
+
+def _run_combine(
+    method_id: str,
+    split: ProcessedSplit,
+    *,
+    device: str,
+    stage: str,
+    campaign_root: Path,
+    repo_root: Path,
+    hop_scores: Any,
+    pathlens_scores: Any,
+    checkpoint: str | Path | None,
+) -> dict[str, Any]:
+    from pathlens.runtime.fusion import BLEND_METHOD, RRF_METHOD, combine_pathlens_three_hop
+
+    combined = combine_pathlens_three_hop(
+        split,
+        device=device,
+        stage=stage,
+        repo_root=repo_root,
+        hop_scores=hop_scores,
+        pathlens_scores=pathlens_scores,
+        checkpoint=checkpoint,
+    )
+    environment = describe_device(device)
+    written: dict[str, Path] = {}
+    for key, sibling_id in (("blend", BLEND_METHOD), ("rrf", RRF_METHOD)):
+        sibling_dir = campaign_root / sibling_id / stage
+        sibling_dir.mkdir(parents=True, exist_ok=True)
+        card = {
+            "method": sibling_id,
+            "stage": stage,
+            "campaign": CAMPAIGN_ID,
+            "split_seed": split.seed,
+            "device": device,
+            "environment": environment,
+            **combined[key],
+        }
+        path = sibling_dir / "metrics.json"
+        path.write_text(json.dumps(card, indent=2, default=_json_default), encoding="utf-8")
+        written[key] = path
+    sibling_copy = campaign_root / BLEND_METHOD / stage / f"{RRF_METHOD}.metrics.json"
+    shutil.copy2(written["rrf"], sibling_copy)
+    payload = dict(combined["blend" if method_id == BLEND_METHOD else "rrf"])
+    payload["sibling"] = RRF_METHOD if method_id == BLEND_METHOD else BLEND_METHOD
+    return payload
 
 
 def _run_heuristic(
