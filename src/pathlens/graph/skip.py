@@ -60,19 +60,16 @@ def visible_training_edges(
     return ordered[unique_mask]
 
 
-def build_skipgnn_adjacencies(
+def build_symmetric_adjacency(
     num_drugs: int,
     num_proteins: int,
     bipartite_edges: NDArray[np.int64],
-) -> tuple[SparseAdj, SparseAdj]:
+) -> SparseAdj:
+    """Unnormalized symmetrized A with no self-loops. Used by GraphSAGE-mean."""
     num_entities = num_drugs + num_proteins
     pairs = np.asarray(bipartite_edges, dtype=np.int64).reshape(-1, 2)
     if len(pairs) == 0:
-        empty = sp.coo_matrix((num_entities, num_entities), dtype=np.float32)
-        original = _normalize_adj(empty + sp.eye(num_entities, dtype=np.float32))
-        skip = _normalize_adj(empty)
-        return original.tocoo(), skip.tocoo()
-
+        return sp.coo_matrix((num_entities, num_entities), dtype=np.float32)
     entity_src = pairs[:, 0]
     entity_dst = pairs[:, 1] + num_drugs
     adj = sp.coo_matrix(
@@ -81,8 +78,17 @@ def build_skipgnn_adjacencies(
         dtype=np.float32,
     )
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)  # noqa: SIM300
+    return adj.tocoo()
+
+
+def build_skipgnn_adjacencies(
+    num_drugs: int,
+    num_proteins: int,
+    bipartite_edges: NDArray[np.int64],
+) -> tuple[SparseAdj, SparseAdj]:
+    adj = build_symmetric_adjacency(num_drugs, num_proteins, bipartite_edges)
     skip = _normalize_adj(adj.dot(adj).sign())
-    original = _normalize_adj(adj + sp.eye(num_entities, dtype=np.float32))
+    original = _normalize_adj(adj + sp.eye(adj.shape[0], dtype=np.float32))
     return original.tocoo(), skip.tocoo()
 
 

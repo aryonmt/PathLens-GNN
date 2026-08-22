@@ -160,6 +160,16 @@ def _run_trained(
             stage=stage,
             run_dir=run_dir,
         )
+    if method_id == "graphsage":
+        from pathlens.training.graphsage import run_graphsage
+
+        return run_graphsage(
+            split,
+            config,
+            device=device,
+            stage=stage,
+            run_dir=run_dir,
+        )
     raise NotImplementedError(f"{method_id} has no trainer in this slice")
 
 

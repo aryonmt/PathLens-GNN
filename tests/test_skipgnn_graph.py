@@ -7,6 +7,7 @@ import scipy.sparse as sp
 from pathlens.graph.skip import (
     bipartite_to_entity_pairs,
     build_skipgnn_adjacencies,
+    build_symmetric_adjacency,
     labeled_entity_pairs,
     visible_training_edges,
 )
@@ -80,6 +81,16 @@ def test_labeled_pairs_reject_unbalanced_banks() -> None:
             np.asarray([[2, 1]], dtype=np.int64),
             num_drugs=3,
         )
+
+
+def test_symmetric_adjacency_has_no_self_loops() -> None:
+    bipartite = np.asarray([[0, 0], [1, 0]], dtype=np.int64)
+    adj = build_symmetric_adjacency(2, 2, bipartite)
+    dense = adj.toarray()
+    assert np.allclose(np.diag(dense), 0.0)
+    assert np.allclose(dense, dense.T)
+    assert dense[0, 2] == 1.0
+    assert dense[2, 0] == 1.0
 
 
 def test_visible_training_edges_exclude_validation() -> None:

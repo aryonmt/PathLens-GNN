@@ -4,3 +4,13 @@ campaign: biosnap-dti-v2
 split_seed: 41
 loss: BCE 1:1
 device: cuda
+seed: 13
+learning_rate: 0.0005
+weight_decay: 0.0005
+max_epochs: 15
+batch_size: 256
+dropout: 0.5
+hidden1: 64
+hidden2: 16
+hidden_decode1: 512
+aggregator: mean

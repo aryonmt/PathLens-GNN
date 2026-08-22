@@ -1,0 +1,13 @@
+{
+  "method": "gcn",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "stage": "eval",
+  "retrain": true,
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "git_ref": "research/ranking-loss",
+  "git_sha": "9fa9913",
+  "source_archive": "outputs/kaggle/gcn-eval/pathlens-stage-output.zip",
+  "source_archive_sha256": "2abff1aa9f8f23fa1b5ad4275cebca3754aea8816870e0112cfc2ea49d4fd080"
+}

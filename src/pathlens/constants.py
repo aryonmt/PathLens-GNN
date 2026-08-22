@@ -17,7 +17,7 @@ EXPECTED_ENTITIES = 7_341
 
 FINAL_TEST_TOKEN = "OPEN_SEALED_TEST_ONCE"
 HEURISTIC_METHODS = frozenset({"degree", "resource_allocation", "three_hop"})
-TRAINED_METHODS = frozenset({"skipgnn", "gcn"})
+TRAINED_METHODS = frozenset({"skipgnn", "gcn", "graphsage"})
 IMPORT_METHODS = frozenset(
     {"one_hop", "s1_s2", "s1_s2_s3_fixed", "pathlens_bce", "pathlens_ranking"}
 )

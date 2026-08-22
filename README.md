@@ -46,8 +46,8 @@ python -m pathlens import-v2
 Import reads the local v2 report ZIP, writes run cards under `runs/biosnap-dti-v2/<method>/imported/`, and does not open the test. Checkpoints are copied locally and gitignored.
 
 Heuristic scoring and training run on Kaggle GPU (Tesla T4), one method at a time.
-The notebook default is `gcn` / `STAGE=eval`. Push the branch before the kernel clones GitHub:
+The notebook default is `graphsage` / `STAGE=eval`. Push the branch before the kernel clones GitHub:
 
 ```bash
-python -m pathlens run --method gcn --stage eval --device cuda:0
+python -m pathlens run --method graphsage --stage eval --device cuda:0
 ```

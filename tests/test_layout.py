@@ -81,6 +81,23 @@ def test_degree_eval_card_is_filed() -> None:
     assert "done" in status.split("`degree`")[1].split("\n")[0]
 
 
+def test_gcn_eval_card_is_filed() -> None:
+    import json
+
+    campaign = REPO_ROOT / "runs" / "biosnap-dti-v2"
+    payload = json.loads(
+        (campaign / "gcn" / "eval" / "metrics.json").read_text(encoding="utf-8")
+    )
+    assert payload["method"] == "gcn"
+    assert payload["stage"] == "eval"
+    assert "test" not in payload
+    assert (campaign / "gcn" / "eval" / "provenance.json").is_file()
+    assert not (campaign / "gcn" / "eval" / "model.pt").exists()
+    status = (REPO_ROOT / "docs" / "STATUS.md").read_text(encoding="utf-8")
+    assert "| `gcn` |" in status
+    assert "done" in status.split("`gcn`")[1].split("\n")[0]
+
+
 def test_skipgnn_eval_card_is_filed() -> None:
     import json
 
@@ -135,14 +152,14 @@ def test_kaggle_drop_layout_exists() -> None:
         assert f"`{name}`" in figures_readme
 
 
-def test_notebook_defaults_to_gcn_eval() -> None:
+def test_notebook_defaults_to_graphsage_eval() -> None:
     import json
 
     notebook = json.loads(
         (REPO_ROOT / "kaggle" / "pathlens_training.ipynb").read_text(encoding="utf-8")
     )
     source = "".join(notebook["cells"][1]["source"])
-    assert 'METHOD = "gcn"' in source
+    assert 'METHOD = "graphsage"' in source
     assert 'STAGE = "eval"' in source
     assert 'FINAL_TEST_TOKEN = ""' in source
     assert "OPEN_SEALED_TEST_ONCE" not in source
