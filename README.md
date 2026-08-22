@@ -23,13 +23,14 @@ Campaign `biosnap-dti-v2` uses split seed 41. The test set is sealed.
 
 Heuristics: `degree`, `resource_allocation`, `three_hop`.
 
-Train here (done): `skipgnn` (BCE), `gcn`, `graphsage`. New mixes:
-`blend_pathlens_three_hop`, `rrf_pathlens_three_hop`, `residual_three_hop`.
+Train here (done): `skipgnn` (BCE), `gcn`, `graphsage`. Filed mixes:
+`blend_pathlens_three_hop`, `rrf_pathlens_three_hop`. Next: `residual_three_hop`.
 Optional: `gat`, `nbfnet`.
 
 Import, do not retrain (done): `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`, `pathlens_ranking`.
 
-Default loss is BCE 1:1. Only `pathlens_ranking` uses sampled softmax.
+Default loss is BCE 1:1. Ranking-loss cards: imported `pathlens_ranking` and
+unfiled `residual_three_hop`.
 
 ## Quick start
 
@@ -50,9 +51,9 @@ family checkpoints are already in the repo under
 `runs/biosnap-dti-v2/<method>/imported/checkpoint.pt`. It does not open the test.
 
 Heuristic scoring and training run on Kaggle GPU (Tesla T4), one method at a time.
-The notebook default is `blend_pathlens_three_hop` / `STAGE=eval`. The freeze
-checkpoint clones with the branch. Push before the kernel clones GitHub:
+The notebook default is `residual_three_hop` / `STAGE=eval`. Push the branch
+before the kernel clones GitHub:
 
 ```bash
-python -m pathlens run --method blend_pathlens_three_hop --stage eval --device cuda:0
+python -m pathlens run --method residual_three_hop --stage eval --device cuda:0
 ```

@@ -15,8 +15,8 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 | `pathlens_ranking` | model | sampled softmax | import | done | freeze `646700d4` |
 | `gcn` | model | BCE 1:1 | yes | done | eval T4 `9fa9913` |
 | `graphsage` | model | BCE 1:1 | yes | done | eval T4 `4138751` |
-| `blend_pathlens_three_hop` | combine | none | no | not_started | — |
-| `rrf_pathlens_three_hop` | combine | none | no | not_started | — |
+| `blend_pathlens_three_hop` | combine | none | no | done | eval T4 `73d5a2a` |
+| `rrf_pathlens_three_hop` | combine | none | no | done | eval T4 `73d5a2a` |
 | `residual_three_hop` | model | sampled softmax | yes | not_started | — |
 | `gat` | model | BCE 1:1 | if hours remain | deferred | — |
 | `nbfnet` | model | TBD | if hours remain | deferred | — |
@@ -28,5 +28,7 @@ checkpoints live in-repo under `runs/biosnap-dti-v2/<method>/imported/checkpoint
 (BSD-3-Clause). Official `skipgnn` (`56970fe`), `gcn` (`9fa9913`), and
 `graphsage` (`4138751`) are in-repo GPU cards, not the v2 `binary_skipgnn`
 overlay. GraphSAGE is Hamilton mean-SAGE (Huang et al. did not report it).
-`resource_allocation` remains the validation MRR leader. The three PathLens×3-hop
-mixes stay `not_started` until a Kaggle card is filed. Test stays sealed.
+`resource_allocation` remains the validation MRR leader. Late fusion selected
+`α=1` (pure z-scored 3-hop). RRF raised hard AUPRC and lowered MRR.
+`residual_three_hop` stays `not_started` until its Kaggle card is filed. Test
+stays sealed.

@@ -188,14 +188,44 @@ def test_kaggle_drop_layout_exists() -> None:
         assert f"`{name}`" in figures_readme
 
 
-def test_notebook_defaults_to_blend_eval() -> None:
+def test_blend_and_rrf_eval_cards_are_filed() -> None:
+    import json
+
+    campaign = REPO_ROOT / "runs" / "biosnap-dti-v2"
+    status = (REPO_ROOT / "docs" / "STATUS.md").read_text(encoding="utf-8")
+    for method_id in ("blend_pathlens_three_hop", "rrf_pathlens_three_hop"):
+        payload = json.loads(
+            (campaign / method_id / "eval" / "metrics.json").read_text(encoding="utf-8")
+        )
+        assert payload["method"] == method_id
+        assert payload["stage"] == "eval"
+        assert "test" not in payload
+        assert (campaign / method_id / "eval" / "provenance.json").is_file()
+        assert not (campaign / method_id / "eval" / "model.pt").exists()
+        assert f"| `{method_id}` |" in status
+        assert "done" in status.split(f"`{method_id}`")[1].split("\n")[0]
+    blend = json.loads(
+        (campaign / "blend_pathlens_three_hop" / "eval" / "metrics.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    rrf = json.loads(
+        (campaign / "rrf_pathlens_three_hop" / "eval" / "metrics.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert blend["combine"]["alpha"] == 1.0
+    assert rrf["combine"]["k"] == 60
+
+
+def test_notebook_defaults_to_residual_eval() -> None:
     import json
 
     notebook = json.loads(
         (REPO_ROOT / "kaggle" / "pathlens_training.ipynb").read_text(encoding="utf-8")
     )
     source = "".join(notebook["cells"][1]["source"])
-    assert 'METHOD = "blend_pathlens_three_hop"' in source
+    assert 'METHOD = "residual_three_hop"' in source
     assert 'STAGE = "eval"' in source
     assert 'FINAL_TEST_TOKEN = ""' in source
     assert "OPEN_SEALED_TEST_ONCE" not in source

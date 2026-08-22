@@ -1,0 +1,15 @@
+{
+  "method": "rrf_pathlens_three_hop",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "stage": "eval",
+  "retrain": false,
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "git_ref": "research/ranking-loss",
+  "git_sha": "73d5a2a",
+  "source_archive": "outputs/kaggle/blend-eval/pathlens-stage-output.zip",
+  "source_archive_sha256": "058c7c234acf8792d4c13c88a974faaedc90178ad37ced07ef05c5138c43c246",
+  "pathlens_checkpoint_sha256": "646700d456ba4cb0de795e7067e1830e8f18598b97fe5cc89d195d631d356586",
+  "k": 60
+}

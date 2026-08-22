@@ -81,9 +81,9 @@ number).
 | `gcn` | 0.822 | 0.136 | 0.221 | 0.147 | 0.187 | eval T4 `9fa9913` |
 | `graphsage` | 0.790 | 0.131 | 0.185 | 0.135 | 0.176 | eval T4 `4138751` |
 
-`pathlens_ranking` has the best hard AUPRC in the current scoreboard.
+RRF has the best hard AUPRC in the current scoreboard (0.907).
 `resource_allocation` has the best filtered MRR (0.462), slightly above
-`three_hop` (0.455). Official `skipgnn`, `gcn`, and `graphsage` are not close
+`three_hop` / z-scored 3-hop (0.455). Official `skipgnn`, `gcn`, and `graphsage` are not close
 on ranking (MRR 0.144 / 0.136 / 0.131). They sit with the BCE PathLens
 ablations, not with the heuristics. The skip channel moved MRR by +0.008 over
 GCN. Mean-SAGE is below both. Selection was validation 1:1 AUROC, which
@@ -92,12 +92,17 @@ matches uniform AUROC and does not buy filtered MRR.
 The v2 ZIP overlay `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
 0.835) is retired as a freeze baseline.
 
-### PathLens × 3-hop mixes (this repo, not yet filed)
+### PathLens × 3-hop mixes (this repo)
 
-Same sealed validation split. Not on the freeze board until cards are filed.
+Same sealed validation split, Tesla T4, freeze checkpoint `646700d4`.
+Late fusion selected `α=1` on validation MRR: mixing in PathLens never beat
+pure 3-hop (best mix was `α=0.4` at MRR 0.402). Per-drug z-scoring leaves
+ranks unchanged and lifts hard AUPRC. RRF (`k=60`) is worse on MRR and best
+so far on hard AUPRC.
 
-| Method | What it is |
-|---|---|
-| `blend_pathlens_three_hop` | Per-drug z-score mix; `α` chosen on validation MRR |
-| `rrf_pathlens_three_hop` | Reciprocal rank fusion, `k=60` |
-| `residual_three_hop` | `three_hop + f_θ`, sampled softmax, select on MRR |
+| Method | hard AUPRC | MRR | Hits@10 | NDCG@10 | NDCG@50 | Source |
+|---|---|---|---|---|---|---|
+| `blend_pathlens_three_hop` | 0.887 | 0.455 | 0.673 | 0.499 | 0.544 | eval T4 `73d5a2a` |
+| `rrf_pathlens_three_hop` | 0.907 | 0.393 | 0.567 | 0.428 | 0.458 | eval T4 `73d5a2a` |
+
+`residual_three_hop` is not filed yet.
