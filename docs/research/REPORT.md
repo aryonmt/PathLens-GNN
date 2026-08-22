@@ -49,7 +49,7 @@ Produced on Kaggle, not on the laptop.
 | Method | hard AUPRC | MRR | Hits@10 | NDCG@10 | NDCG@50 | Source |
 |---|---|---|---|---|---|---|
 | `three_hop` | 0.847 | 0.455 | 0.673 | 0.499 | 0.544 | eval T4 `46fc64f` |
-| `degree` | — | — | — | — | — | not_started |
+| `degree` | 0.774 | 0.134 | 0.211 | 0.144 | 0.182 | eval T4 `5daa27c` |
 | `resource_allocation` | — | — | — | — | — | not_started |
 
 ### PathLens family (imported campaign v2)
@@ -68,8 +68,8 @@ Validation only. Test sealed. NDCG is computed from the stored filtered ranks
 `pathlens_ranking` confirmation (seeds 13/29/71): MRR 0.373 ± 0.003, hard AUPRC 0.883 ± 0.013.
 
 `pathlens_ranking` has the best hard AUPRC in the current scoreboard.
-`three_hop` has the best filtered MRR. That split is the result, not a reason
-to drop the ablations.
+`three_hop` has the best filtered MRR. `degree` is far below `three_hop` on MRR
+(0.134 vs 0.455), so the heuristic lead is path structure, not popularity.
 
 The v2 ZIP also scored `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
 0.835). That overlay is **not** the official `skipgnn` card; train SkipGNN in

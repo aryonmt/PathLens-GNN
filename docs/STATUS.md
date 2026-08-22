@@ -4,7 +4,7 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 
 | Method | Kind | Loss | Train here | Status | Last run |
 |---|---|---|---|---|---|
-| `degree` | heuristic | none | no | not_started | — |
+| `degree` | heuristic | none | no | done | eval T4 `5daa27c` |
 | `resource_allocation` | heuristic | none | no | not_started | — |
 | `three_hop` | heuristic | none | no | done | eval T4 `46fc64f` |
 | `skipgnn` | model | BCE 1:1 | yes | not_started | — |
