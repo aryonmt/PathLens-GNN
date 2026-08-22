@@ -23,7 +23,7 @@ Campaign `biosnap-dti-v2` uses split seed 41. The test set is sealed.
 
 Heuristics: `degree`, `resource_allocation`, `three_hop`.
 
-Train here: `skipgnn` (BCE), then `gcn` and `graphsage`. Optional: `gat`, `nbfnet`.
+Train here (done): `skipgnn` (BCE), `gcn`, `graphsage`. Optional: `gat`, `nbfnet`.
 
 Import, do not retrain (done): `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`, `pathlens_ranking`.
 

@@ -1,9 +1,9 @@
 # Kaggle
 
 One notebook: `pathlens_training.ipynb`. Set `METHOD` to a folder name under
-`methods/`. The committed default is `graphsage` with `STAGE=eval`. Official
-`skipgnn` and `gcn` are already filed — do not rerun them. `STAGE=final` is
-refused until freeze.
+`methods/`. The committed default is still `graphsage` with `STAGE=eval`.
+Official `skipgnn`, `gcn`, and `graphsage` are already filed — do not rerun
+them. `STAGE=final` is refused until freeze. `gat` and `nbfnet` stay deferred.
 
 Internet must be on so the kernel can clone the branch **from GitHub** and
 download BioSNAP. Push `research/ranking-loss` before you run.
@@ -43,18 +43,11 @@ File the download using [`runs/README.md`](../runs/README.md): raw ZIP under
 `runs/biosnap-dti-v2/figures/`. Do not commit `outputs/` dumps or
 `pathlens-stage-output*.zip`.
 
-## Operator: `graphsage` eval
+## Filed: `graphsage` eval
 
-1. Confirm the local branch is committed and pushed to `origin/research/ranking-loss`.
-2. New kernel. GPU T4. Internet on. One method per session.
-3. Use `kaggle/pathlens_training.ipynb`. Defaults:
-   `METHOD="graphsage"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
-   `FINAL_TEST_TOKEN=""`.
-4. Save & Run All. Log should show `device=cuda:0` and `[graphsage] epoch=...`.
-   This is Hamilton mean-SAGE, not a Huang et al. paper number.
-5. Download `/kaggle/working/pathlens-stage-output.zip`. File per
-   [`runs/README.md`](../runs/README.md).
-6. Do not set `STAGE=final`. Do not rerun `skipgnn` or `gcn`.
+`runs/biosnap-dti-v2/graphsage/eval/` from `outputs/kaggle/graphsage-eval/`.
+Validation MRR 0.131, hard AUPRC 0.790. Hamilton mean-SAGE, not a Huang et al.
+paper number. Do not rerun.
 
 ## Filed: `gcn` eval
 

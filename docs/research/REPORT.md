@@ -71,19 +71,23 @@ Validation only. Test sealed. NDCG is computed from the stored filtered ranks
 ### Official GNN baselines (this repo)
 
 Same split, seed 13, Tesla T4, BCE 1:1, same decoder. Test sealed.
-`skipgnn` adds the `sign(A^2)` channel; `gcn` is original-graph only.
+`skipgnn` adds the `sign(A^2)` channel; `gcn` is original-graph only;
+`graphsage` is Hamilton mean-SAGE on unnormalized A (not a Huang et al. paper
+number).
 
 | Method | hard AUPRC | MRR | Hits@10 | NDCG@10 | NDCG@50 | Source |
 |---|---|---|---|---|---|---|
 | `skipgnn` | 0.824 | 0.144 | 0.232 | 0.157 | 0.197 | eval T4 `56970fe` |
 | `gcn` | 0.822 | 0.136 | 0.221 | 0.147 | 0.187 | eval T4 `9fa9913` |
+| `graphsage` | 0.790 | 0.131 | 0.185 | 0.135 | 0.176 | eval T4 `4138751` |
 
 `pathlens_ranking` has the best hard AUPRC in the current scoreboard.
 `resource_allocation` has the best filtered MRR (0.462), slightly above
-`three_hop` (0.455). Official `skipgnn` and `gcn` are not close on ranking
-(MRR 0.144 and 0.136). They sit with the BCE PathLens ablations, not with the
-heuristics. The skip channel moved MRR by +0.008 over GCN. Selection was
-validation 1:1 AUROC, which matches uniform AUROC and does not buy filtered MRR.
+`three_hop` (0.455). Official `skipgnn`, `gcn`, and `graphsage` are not close
+on ranking (MRR 0.144 / 0.136 / 0.131). They sit with the BCE PathLens
+ablations, not with the heuristics. The skip channel moved MRR by +0.008 over
+GCN. Mean-SAGE is below both. Selection was validation 1:1 AUROC, which
+matches uniform AUROC and does not buy filtered MRR.
 
 The v2 ZIP overlay `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
-0.835) is retired as a freeze baseline. GraphSAGE still has an empty run card.
+0.835) is retired as a freeze baseline.

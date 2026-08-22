@@ -1,0 +1,13 @@
+{
+  "method": "graphsage",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "stage": "eval",
+  "retrain": true,
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "git_ref": "research/ranking-loss",
+  "git_sha": "4138751",
+  "source_archive": "outputs/kaggle/graphsage-eval/pathlens-stage-output.zip",
+  "source_archive_sha256": "bbd3c2074abda19877e33898ad1f3469c1c1c93c615ccc87c78e65f10ee44e7b"
+}

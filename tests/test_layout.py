@@ -81,6 +81,23 @@ def test_degree_eval_card_is_filed() -> None:
     assert "done" in status.split("`degree`")[1].split("\n")[0]
 
 
+def test_graphsage_eval_card_is_filed() -> None:
+    import json
+
+    campaign = REPO_ROOT / "runs" / "biosnap-dti-v2"
+    payload = json.loads(
+        (campaign / "graphsage" / "eval" / "metrics.json").read_text(encoding="utf-8")
+    )
+    assert payload["method"] == "graphsage"
+    assert payload["stage"] == "eval"
+    assert "test" not in payload
+    assert (campaign / "graphsage" / "eval" / "provenance.json").is_file()
+    assert not (campaign / "graphsage" / "eval" / "model.pt").exists()
+    status = (REPO_ROOT / "docs" / "STATUS.md").read_text(encoding="utf-8")
+    assert "| `graphsage` |" in status
+    assert "done" in status.split("`graphsage`")[1].split("\n")[0]
+
+
 def test_gcn_eval_card_is_filed() -> None:
     import json
 
