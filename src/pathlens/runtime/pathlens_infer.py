@@ -25,10 +25,9 @@ def resolve_pathlens_checkpoint(repo_root: str | Path | None = None) -> Path:
     archive = find_v2_report(root)
     if archive is None:
         raise FileNotFoundError(
-            "Frozen PathLens checkpoint not found. Place "
-            "pathlens-stage-output-v2-report.zip under "
-            "legacy2/outputs-kaggle/kaggle-stages/ or attach it as a Kaggle input, "
-            "then rerun. The laptop path is import-v2; the checkpoint stays gitignored."
+            "Frozen PathLens checkpoint not found at "
+            "runs/biosnap-dti-v2/pathlens_ranking/imported/checkpoint.pt. "
+            "Clone research/ranking-loss or run import-v2 from the v2 report ZIP."
         )
     import_v2_report(archive, root / "runs" / "biosnap-dti-v2", copy_weights=True)
     if not imported.is_file():

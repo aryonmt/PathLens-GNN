@@ -3,9 +3,10 @@
 One notebook: `pathlens_training.ipynb`. Set `METHOD` to a folder name under
 `methods/`. The committed default is `blend_pathlens_three_hop` with
 `STAGE=eval`. Official `skipgnn`, `gcn`, and `graphsage` are already filed —
-do not rerun them. Attach the private `pathlens-stage-output-v2-report.zip`
-so the kernel can load the frozen PathLens checkpoint. `STAGE=final` is
-refused until freeze. `gat` and `nbfnet` stay deferred.
+do not rerun them. The frozen PathLens checkpoint is in the clone under
+`runs/biosnap-dti-v2/pathlens_ranking/imported/checkpoint.pt`. Do not attach
+a private ZIP. `STAGE=final` is refused until freeze. `gat` and `nbfnet`
+stay deferred.
 
 Internet must be on so the kernel can clone the branch **from GitHub** and
 download BioSNAP. Push `research/ranking-loss` before you run.
@@ -50,16 +51,13 @@ File the download using [`runs/README.md`](../runs/README.md): raw ZIP under
 Writes both the late-fusion card and `rrf_pathlens_three_hop` in one session.
 
 1. Confirm `research/ranking-loss` is pushed.
-2. New kernel. GPU T4. Internet on.
-3. Add Input: the private dataset built from
-   `legacy2/outputs-kaggle/kaggle-stages/pathlens-stage-output-v2-report.zip`
-   (filename must stay `pathlens-stage-output-v2-report.zip`).
-4. Use `kaggle/pathlens_training.ipynb`. Defaults:
+2. New kernel. GPU T4. Internet on. No extra Input dataset.
+3. Use `kaggle/pathlens_training.ipynb`. Defaults:
    `METHOD="blend_pathlens_three_hop"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
    `FINAL_TEST_TOKEN=""`.
-5. Save & Run All. Log should show PathLens scoring, then a blend `α` sweep
+4. Save & Run All. Log should show PathLens scoring, then a blend `α` sweep
    and RRF. Do not set `STAGE=final`.
-6. File the ZIP. It contains blend metrics plus
+5. File the ZIP. It contains blend metrics plus
    `rrf_pathlens_three_hop.metrics.json`. Also copy
    `runs/biosnap-dti-v2/rrf_pathlens_three_hop/eval/metrics.json` if present
    in the working tree.

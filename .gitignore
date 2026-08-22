@@ -48,6 +48,7 @@ runs/**/*.pt
 runs/**/*.pth
 runs/**/*.ckpt
 runs/**/*.npz
+!runs/biosnap-dti-v2/*/imported/checkpoint.pt
 
 # Downloaded and generated data
 data/raw/

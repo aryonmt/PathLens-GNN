@@ -23,4 +23,10 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 
 Status values: `not_started`, `import_pending`, `running`, `done`, `deferred`.
 
-Imported cards are validation-only from `pathlens-stage-output-v2-report.zip`. Weights stay local and gitignored. Official `skipgnn` (`56970fe`), `gcn` (`9fa9913`), and `graphsage` (`4138751`) are in-repo GPU cards, not the v2 `binary_skipgnn` overlay. GraphSAGE is Hamilton mean-SAGE (Huang et al. did not report it). `resource_allocation` remains the validation MRR leader. The three PathLens×3-hop mixes (`blend_pathlens_three_hop`, `rrf_pathlens_three_hop`, `residual_three_hop`) are new validation experiments. They stay `not_started` until a Kaggle card is filed. Test stays sealed.
+Imported cards are validation-only from campaign v2. The PathLens family
+checkpoints live in-repo under `runs/biosnap-dti-v2/<method>/imported/checkpoint.pt`
+(BSD-3-Clause). Official `skipgnn` (`56970fe`), `gcn` (`9fa9913`), and
+`graphsage` (`4138751`) are in-repo GPU cards, not the v2 `binary_skipgnn`
+overlay. GraphSAGE is Hamilton mean-SAGE (Huang et al. did not report it).
+`resource_allocation` remains the validation MRR leader. The three PathLens×3-hop
+mixes stay `not_started` until a Kaggle card is filed. Test stays sealed.

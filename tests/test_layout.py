@@ -38,6 +38,20 @@ def test_status_board_lists_every_method() -> None:
         assert f"`{method_id}`" in status
 
 
+def test_imported_pathlens_checkpoints_are_in_the_repo() -> None:
+    import hashlib
+
+    from pathlens.constants import IMPORT_METHODS, V2_FREEZE_CHECKPOINT_SHA256
+
+    campaign = REPO_ROOT / "runs" / "biosnap-dti-v2"
+    for method_id in IMPORT_METHODS:
+        checkpoint = campaign / method_id / "imported" / "checkpoint.pt"
+        assert checkpoint.is_file(), method_id
+    freeze = campaign / "pathlens_ranking" / "imported" / "checkpoint.pt"
+    digest = hashlib.sha256(freeze.read_bytes()).hexdigest()
+    assert digest == V2_FREEZE_CHECKPOINT_SHA256
+
+
 def test_imported_methods_are_marked_done() -> None:
     status = (REPO_ROOT / "docs" / "STATUS.md").read_text(encoding="utf-8")
     imported = ("one_hop", "s1_s2", "s1_s2_s3_fixed", "pathlens_bce", "pathlens_ranking")

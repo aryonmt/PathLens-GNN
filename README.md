@@ -45,12 +45,13 @@ uv run pytest
 python -m pathlens import-v2
 ```
 
-Import reads the local v2 report ZIP, writes run cards under `runs/biosnap-dti-v2/<method>/imported/`, and does not open the test. Checkpoints are copied locally and gitignored.
+Import reads a local v2 report ZIP if you still have one. The locked PathLens
+family checkpoints are already in the repo under
+`runs/biosnap-dti-v2/<method>/imported/checkpoint.pt`. It does not open the test.
 
 Heuristic scoring and training run on Kaggle GPU (Tesla T4), one method at a time.
-The notebook default is `blend_pathlens_three_hop` / `STAGE=eval`. Attach the
-v2 report ZIP so the kernel can load the frozen PathLens checkpoint. Push the
-branch before the kernel clones GitHub:
+The notebook default is `blend_pathlens_three_hop` / `STAGE=eval`. The freeze
+checkpoint clones with the branch. Push before the kernel clones GitHub:
 
 ```bash
 python -m pathlens run --method blend_pathlens_three_hop --stage eval --device cuda:0
