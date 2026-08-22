@@ -1,0 +1,13 @@
+{
+  "method": "resource_allocation",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "stage": "eval",
+  "retrain": false,
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "git_ref": "research/ranking-loss",
+  "git_sha": "d2b90ca",
+  "source_archive": "outputs/kaggle/resource_allocation-eval/pathlens-stage-output.zip",
+  "source_archive_sha256": "199c5c470c402a276eee76ff18b5e157604f7516af15802d078ecc918cda69ae"
+}

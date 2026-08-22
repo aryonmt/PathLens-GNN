@@ -25,8 +25,9 @@ systems. Keep the ladder even though `pathlens_ranking` is the family champion:
 Reporting only the best PathLens number would hide two facts this campaign is
 about: ranking loss, not extra hops, is what moved PathLens (BCE variants stay
 near MRR 0.10–0.16); and the family champion still loses filtered MRR to the
-parameter-free `three_hop` heuristic. Freeze compares against `three_hop` and
-`skipgnn`, not against other PathLens siblings.
+parameter-free `resource_allocation` heuristic. Freeze currently names
+`three_hop` and `skipgnn`; on this split `resource_allocation` is the stronger
+heuristic.
 
 ## Validation figures
 
@@ -48,9 +49,9 @@ Produced on Kaggle, not on the laptop.
 
 | Method | hard AUPRC | MRR | Hits@10 | NDCG@10 | NDCG@50 | Source |
 |---|---|---|---|---|---|---|
+| `resource_allocation` | 0.845 | 0.462 | 0.672 | 0.504 | 0.547 | eval T4 `d2b90ca` |
 | `three_hop` | 0.847 | 0.455 | 0.673 | 0.499 | 0.544 | eval T4 `46fc64f` |
 | `degree` | 0.774 | 0.134 | 0.211 | 0.144 | 0.182 | eval T4 `5daa27c` |
-| `resource_allocation` | — | — | — | — | — | not_started |
 
 ### PathLens family (imported campaign v2)
 
@@ -68,8 +69,10 @@ Validation only. Test sealed. NDCG is computed from the stored filtered ranks
 `pathlens_ranking` confirmation (seeds 13/29/71): MRR 0.373 ± 0.003, hard AUPRC 0.883 ± 0.013.
 
 `pathlens_ranking` has the best hard AUPRC in the current scoreboard.
-`three_hop` has the best filtered MRR. `degree` is far below `three_hop` on MRR
-(0.134 vs 0.455), so the heuristic lead is path structure, not popularity.
+`resource_allocation` has the best filtered MRR (0.462), slightly above
+`three_hop` (0.455). The extra `1/deg(d')` on the 3-hop walk is not what made
+the path heuristic work; the RA/AA same-type projection is. `degree` remains
+far below both (MRR 0.134), so the lead is still path structure, not popularity.
 
 The v2 ZIP also scored `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
 0.835). That overlay is **not** the official `skipgnn` card; train SkipGNN in

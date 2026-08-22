@@ -5,7 +5,7 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 | Method | Kind | Loss | Train here | Status | Last run |
 |---|---|---|---|---|---|
 | `degree` | heuristic | none | no | done | eval T4 `5daa27c` |
-| `resource_allocation` | heuristic | none | no | not_started | — |
+| `resource_allocation` | heuristic | none | no | done | eval T4 `d2b90ca` |
 | `three_hop` | heuristic | none | no | done | eval T4 `46fc64f` |
 | `skipgnn` | model | BCE 1:1 | yes | not_started | — |
 | `one_hop` | model | BCE 1:1 | import | done | imported v2 `bc7a4d50` |
@@ -20,4 +20,4 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 
 Status values: `not_started`, `import_pending`, `running`, `done`, `deferred`.
 
-Imported cards are validation-only from `pathlens-stage-output-v2-report.zip`. Weights stay local and gitignored. `binary_skipgnn` from that ZIP is **not** the official `skipgnn` run. `three_hop` is the current validation MRR leader; PathLens siblings stay on the board as an ablation ladder, not as extra systems to beat.
+Imported cards are validation-only from `pathlens-stage-output-v2-report.zip`. Weights stay local and gitignored. `binary_skipgnn` from that ZIP is **not** the official `skipgnn` run. `resource_allocation` is the current validation MRR leader. PathLens siblings stay on the board as an ablation ladder, not as extra systems to beat.

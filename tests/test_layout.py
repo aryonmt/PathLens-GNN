@@ -81,6 +81,21 @@ def test_degree_eval_card_is_filed() -> None:
     assert "done" in status.split("`degree`")[1].split("\n")[0]
 
 
+def test_resource_allocation_eval_card_is_filed() -> None:
+    import json
+
+    campaign = REPO_ROOT / "runs" / "biosnap-dti-v2"
+    payload = json.loads(
+        (campaign / "resource_allocation" / "eval" / "metrics.json").read_text(encoding="utf-8")
+    )
+    assert payload["method"] == "resource_allocation"
+    assert payload["stage"] == "eval"
+    assert "test" not in payload
+    status = (REPO_ROOT / "docs" / "STATUS.md").read_text(encoding="utf-8")
+    assert "| `resource_allocation` |" in status
+    assert "done" in status.split("`resource_allocation`")[1].split("\n")[0]
+
+
 def test_runs_campaign_directory_exists() -> None:
     assert (Path(REPO_ROOT) / "runs" / "biosnap-dti-v2").is_dir()
 
