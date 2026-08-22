@@ -68,14 +68,21 @@ Validation only. Test sealed. NDCG is computed from the stored filtered ranks
 
 `pathlens_ranking` confirmation (seeds 13/29/71): MRR 0.373 ± 0.003, hard AUPRC 0.883 ± 0.013.
 
+### Official SkipGNN (this repo)
+
+Trained here from `legacy1` algebra, seed 13, Tesla T4. Test sealed.
+
+| Method | hard AUPRC | MRR | Hits@10 | NDCG@10 | NDCG@50 | Source |
+|---|---|---|---|---|---|---|
+| `skipgnn` | 0.824 | 0.144 | 0.232 | 0.157 | 0.197 | eval T4 `56970fe` |
+
 `pathlens_ranking` has the best hard AUPRC in the current scoreboard.
 `resource_allocation` has the best filtered MRR (0.462), slightly above
-`three_hop` (0.455). The extra `1/deg(d')` on the 3-hop walk is not what made
-the path heuristic work; the RA/AA same-type projection is. `degree` remains
-far below both (MRR 0.134), so the lead is still path structure, not popularity.
+`three_hop` (0.455). Official `skipgnn` is not close on ranking (MRR 0.144,
+Hits@10 0.232). It sits with the BCE PathLens ablations, not with the
+heuristics. Selection was validation 1:1 AUROC (best 0.932 at epoch 6), which
+matches uniform AUROC and does not buy filtered MRR.
 
-The v2 ZIP also scored `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
-0.835). That overlay is **not** the official `skipgnn` card; train SkipGNN in
-this repo before using it as a freeze baseline.
-
-Official SkipGNN, GCN, and GraphSAGE still have empty run cards.
+The v2 ZIP overlay `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
+0.835) is retired as a freeze baseline. The official card is this run. GCN and
+GraphSAGE still have empty run cards.

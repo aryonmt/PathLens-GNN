@@ -150,6 +150,16 @@ def _run_trained(
             stage=stage,
             run_dir=run_dir,
         )
+    if method_id == "gcn":
+        from pathlens.training.gcn import run_gcn
+
+        return run_gcn(
+            split,
+            config,
+            device=device,
+            stage=stage,
+            run_dir=run_dir,
+        )
     raise NotImplementedError(f"{method_id} has no trainer in this slice")
 
 

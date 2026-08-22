@@ -1,14 +1,14 @@
 # Kaggle
 
 One notebook: `pathlens_training.ipynb`. Set `METHOD` to a folder name under
-`methods/`. The committed default is `skipgnn` with `STAGE=eval` so Save &
-Run All trains official SkipGNN and writes the validation card. It does **not**
-open the test. `STAGE=final` is refused until freeze.
+`methods/`. The committed default is `gcn` with `STAGE=eval`. Official
+`skipgnn` is already filed — do not rerun it. `STAGE=final` is refused until
+freeze.
 
 Internet must be on so the kernel can clone the branch **from GitHub** and
 download BioSNAP. Push `research/ranking-loss` before you run.
 
-| Stage | Heuristic (`degree`, `resource_allocation`, `three_hop`) | `skipgnn` |
+| Stage | Heuristic (`degree`, `resource_allocation`, `three_hop`) | `skipgnn` / `gcn` |
 |---|---|---|
 | `smoke` | GPU score matrix, validation MRR + AUPRC | 2-epoch train + validation MRR/AUPRC |
 | `train` | refused | full train, checkpoint, validation metrics |
@@ -43,18 +43,20 @@ File the download using [`runs/README.md`](../runs/README.md): raw ZIP under
 `runs/biosnap-dti-v2/figures/`. Do not commit `outputs/` dumps or
 `pathlens-stage-output*.zip`.
 
-## Operator: `skipgnn` eval
+## Operator: `gcn` eval
 
 1. Confirm the local branch is committed and pushed to `origin/research/ranking-loss`.
 2. New kernel. GPU T4. Internet on. One method per session.
 3. Use `kaggle/pathlens_training.ipynb`. Defaults:
-   `METHOD="skipgnn"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
+   `METHOD="gcn"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
    `FINAL_TEST_TOKEN=""`.
-4. Save & Run All. Log should show `device=cuda:0` and `[skipgnn] epoch=...`.
-   This is the official Huang encoder, not the imported `binary_skipgnn` overlay.
+4. Save & Run All. Log should show `device=cuda:0` and `[gcn] epoch=...`.
+   This is the original-graph GCN baseline, not SkipGNN and not GraphSAGE.
 5. Download `/kaggle/working/pathlens-stage-output.zip` — it contains `metrics.json`
    and `figures/`. File them per [`runs/README.md`](../runs/README.md).
-6. Do not set `STAGE=final`.
+6. Do not set `STAGE=final`. Do not rerun `skipgnn`.
 
-After `metrics.json` is in `runs/biosnap-dti-v2/skipgnn/eval/`, flip
-`docs/STATUS.md` in the same change. Then train `gcn`.
+## Filed: `skipgnn` eval
+
+`runs/biosnap-dti-v2/skipgnn/eval/` from `outputs/kaggle/skipgnn-eval/`.
+Validation MRR 0.144, hard AUPRC 0.824.

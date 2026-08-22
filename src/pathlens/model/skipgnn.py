@@ -14,6 +14,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
+from pathlens.model.decode import score_from_embeddings
 from pathlens.model.layers import GraphConvolution
 
 
@@ -84,20 +85,13 @@ def score_all_pairs(
     model.eval()
     with torch.inference_mode():
         embeddings = model.encode(features, o_adj, s_adj)
-        drug = embeddings[:num_drugs]
-        protein = embeddings[num_drugs : num_drugs + num_proteins]
-        rows: list[Tensor] = []
-        for start in range(0, num_drugs, drug_batch):
-            block = drug[start : start + drug_batch]
-            feat = torch.cat(
-                (
-                    block[:, None, :].expand(-1, num_proteins, -1),
-                    protein[None, :, :].expand(block.size(0), -1, -1),
-                ),
-                dim=-1,
-            )
-            rows.append(model.decoder2(model.decoder1(feat)).squeeze(-1))
-        scores = torch.cat(rows, dim=0)
+        scores = score_from_embeddings(
+            model,
+            embeddings,
+            num_drugs=num_drugs,
+            num_proteins=num_proteins,
+            drug_batch=drug_batch,
+        )
     if was_training:
         model.train()
     return scores

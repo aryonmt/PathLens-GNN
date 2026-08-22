@@ -157,11 +157,31 @@ def test_skipgnn_eval_includes_curves_and_checkpoint(tmp_path: Path) -> None:
     assert Path(result["checkpoint"]).is_file()
 
 
-def test_gcn_trainer_is_not_implemented_yet(tmp_path: Path) -> None:
+def test_gcn_smoke_writes_metrics_and_skips_test(tmp_path: Path) -> None:
+    pytest.importorskip("torch")
+    processed = _prepared(tmp_path)
+    result = run_stage(
+        "gcn",
+        "smoke",
+        device="cpu",
+        processed_dir=processed,
+        output_root=tmp_path / "runs",
+        download=False,
+        strict_identity=False,
+        write_archive=False,
+    )
+    assert Path(result["output_dir"], "metrics.json").is_file()
+    assert "mrr" in result["filtered_ranking"]
+    assert "curves" not in result["classification"]["hard"]
+    assert "test" not in result
+    assert result["training"]["epochs"] == 2
+
+
+def test_graphsage_trainer_is_not_implemented_yet(tmp_path: Path) -> None:
     processed = _prepared(tmp_path)
     with pytest.raises(NotImplementedError, match="no trainer"):
         run_stage(
-            "gcn",
+            "graphsage",
             "smoke",
             device="cpu",
             processed_dir=processed,
