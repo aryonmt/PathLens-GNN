@@ -23,10 +23,10 @@ All methods report the same suite on validation until freeze:
 
 ## Figures
 
-Eval means this figure set, not a single scalar. Plots are written on Kaggle
-into `runs/biosnap-dti-v2/figures/` from `scripts/plot_validation_report.py`.
-Do not generate them on the laptop. Matplotlib is already on Kaggle; it is not
-a local dependency.
+Eval means this figure set, not a single scalar. Copy Kaggle PNGs into
+[`runs/biosnap-dti-v2/figures/`](../../runs/biosnap-dti-v2/figures/). See
+[`runs/README.md`](../../runs/README.md) for the drop map. Do not generate them
+on the laptop. Matplotlib is already on Kaggle; it is not a local dependency.
 
 - `pr_hard.png` / `pr_uniform.png` — precision–recall on each negative bank
 - `roc_hard.png` — ROC on hard negatives

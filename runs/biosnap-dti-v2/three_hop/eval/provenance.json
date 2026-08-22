@@ -1,0 +1,14 @@
+{
+  "method": "three_hop",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "stage": "eval",
+  "retrain": false,
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "kernel": "aryoamirrezanemati/notebooke2d6f990c4",
+  "git_ref": "research/ranking-loss",
+  "git_sha": "46fc64f",
+  "source_archive": "outputs/kaggle/notebooke2d6f990c4/pathlens-stage-output.zip",
+  "source_archive_sha256": "8d2016ca2b3f2f295e40eade1ea0e84982885e78ceb3dc978589a0183deb6bba"
+}

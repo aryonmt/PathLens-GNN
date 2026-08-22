@@ -28,7 +28,12 @@ env/
 .ipynb_checkpoints/
 
 # Local experiment outputs (never commit weights or raw dumps)
-outputs/
+outputs/*
+!outputs/README.md
+!outputs/kaggle/
+outputs/kaggle/**
+!outputs/kaggle/README.md
+pathlens-stage-output*.zip
 legacy2/outputs-kaggle/
 legacy2/local-runs/
 legacy2/data/

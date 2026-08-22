@@ -11,10 +11,27 @@ are unknown non-edges.
 
 See [`docs/STATUS.md`](../STATUS.md).
 
+The five PathLens cards are **one architecture, ablated**, not five rival
+systems. Keep the ladder even though `pathlens_ranking` is the family champion:
+
+| Card | Isolated change |
+|---|---|
+| `one_hop` | S1 only (opposite-type 1-hop) |
+| `s1_s2` | add same-type projection S2 (not a drug–protein path) |
+| `s1_s2_s3_fixed` | add S3 with a fixed mix |
+| `pathlens_bce` | full model, adaptive gate, BCE 1:1 |
+| `pathlens_ranking` | same as `pathlens_bce`, sampled-softmax ranking loss |
+
+Reporting only the best PathLens number would hide two facts this campaign is
+about: ranking loss, not extra hops, is what moved PathLens (BCE variants stay
+near MRR 0.10–0.16); and the family champion still loses filtered MRR to the
+parameter-free `three_hop` heuristic. Freeze compares against `three_hop` and
+`skipgnn`, not against other PathLens siblings.
+
 ## Validation figures
 
-The evaluation phase is this figure set. Files are produced on Kaggle under
-`runs/biosnap-dti-v2/figures/`, not on the laptop.
+Filed under [`runs/biosnap-dti-v2/figures/`](../../runs/biosnap-dti-v2/figures/).
+Produced on Kaggle, not on the laptop.
 
 | File | What it shows |
 |---|---|
@@ -25,15 +42,18 @@ The evaluation phase is this figure set. Files are produced on Kaggle under
 | `mrr_and_hard_auprc.png` | Filtered MRR vs hard AUPRC |
 | `degree_slices_hard.png` | Hard AUPRC by endpoint-degree tertile |
 
-Imported PathLens / SkipGNN curves in these figures come from campaign v2
-checkpoints. Plot them on Kaggle from `runs/biosnap-dti-v2` with
-`scripts/plot_validation_report.py --report runs/biosnap-dti-v2`. Official
-`skipgnn` training in this repo will replace that overlay when its run card is
-`done`. Do not generate the PNGs on the laptop.
-
 ## Validation tables
 
-Imported PathLens cards from campaign v2 (`pathlens-stage-output-v2-report.zip`).
+### Heuristics (this repo)
+
+| Method | hard AUPRC | MRR | Hits@10 | NDCG@10 | NDCG@50 | Source |
+|---|---|---|---|---|---|---|
+| `three_hop` | 0.847 | 0.455 | 0.673 | 0.499 | 0.544 | eval T4 `46fc64f` |
+| `degree` | — | — | — | — | — | not_started |
+| `resource_allocation` | — | — | — | — | — | not_started |
+
+### PathLens family (imported campaign v2)
+
 Validation only. Test sealed. NDCG is computed from the stored filtered ranks
 (no rescoring, no test access).
 
@@ -47,6 +67,12 @@ Validation only. Test sealed. NDCG is computed from the stored filtered ranks
 
 `pathlens_ranking` confirmation (seeds 13/29/71): MRR 0.373 ± 0.003, hard AUPRC 0.883 ± 0.013.
 
-The v2 ZIP also scored `normalized_three_hop` (MRR 0.455, Hits@10 0.673, hard AUPRC 0.847) and `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC 0.835). Those are **not** finished cards in this repo: `three_hop` will be re-run here, and `skipgnn` will be trained here.
+`pathlens_ranking` has the best hard AUPRC in the current scoreboard.
+`three_hop` has the best filtered MRR. That split is the result, not a reason
+to drop the ablations.
 
-Heuristics, official SkipGNN, GCN, and GraphSAGE still have empty run cards.
+The v2 ZIP also scored `binary_skipgnn` (MRR 0.110, Hits@10 0.217, hard AUPRC
+0.835). That overlay is **not** the official `skipgnn` card; train SkipGNN in
+this repo before using it as a freeze baseline.
+
+Official SkipGNN, GCN, and GraphSAGE still have empty run cards.

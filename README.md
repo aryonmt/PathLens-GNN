@@ -11,7 +11,7 @@ codebase. It is not a product or a clinical tool.
 |---|---|
 | [`docs/STATUS.md`](docs/STATUS.md) | Scoreboard: every method, status, last run |
 | [`methods/<id>/`](methods/) | Definition of one heuristic or model |
-| [`runs/biosnap-dti-v2/`](runs/biosnap-dti-v2/) | Artifacts of actual runs |
+| [`runs/biosnap-dti-v2/`](runs/biosnap-dti-v2/) | Artifacts of actual runs ([`runs/README.md`](runs/README.md)) |
 | [`src/pathlens/`](src/pathlens/) | Shared data, eval, and trainers |
 | [`kaggle/`](kaggle/) | One notebook; set `METHOD` |
 | [`legacy1/`](legacy1/) | Original SkipGNN clone (gitignored) |
@@ -46,8 +46,8 @@ python -m pathlens import-v2
 Import reads the local v2 report ZIP, writes run cards under `runs/biosnap-dti-v2/<method>/imported/`, and does not open the test. Checkpoints are copied locally and gitignored.
 
 Heuristic scoring and training run on Kaggle GPU (Tesla T4), one method at a time.
-The notebook default is `three_hop` / `STAGE=eval`. Push the branch before the kernel clones GitHub:
+The notebook default is `degree` / `STAGE=eval`. Push the branch before the kernel clones GitHub:
 
 ```bash
-python -m pathlens run --method three_hop --stage eval --device cuda:0
+python -m pathlens run --method degree --stage eval --device cuda:0
 ```
