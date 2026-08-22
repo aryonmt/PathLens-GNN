@@ -84,6 +84,7 @@ def test_processed_split_keeps_test_sealed(tmp_path: Path) -> None:
     processed = tmp_path / "processed"
     prepare_biosnap_dataset(FIXTURE, processed, seed=13, strict_identity=False)
     split = load_processed(processed, allow_test=False)
+    assert split.train_uniform.shape == split.train_positive.shape
     with pytest.raises(SealedTestError):
         split.test_array("test_positive")
     opened = load_processed(processed, allow_test=True)

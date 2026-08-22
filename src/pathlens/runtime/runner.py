@@ -7,7 +7,13 @@ from pathlib import Path
 from typing import Any
 
 from pathlens import REPO_ROOT
-from pathlens.constants import CAMPAIGN_ID, FINAL_TEST_TOKEN, HEURISTIC_METHODS, STAGES
+from pathlens.constants import (
+    CAMPAIGN_ID,
+    FINAL_TEST_TOKEN,
+    HEURISTIC_METHODS,
+    STAGES,
+    TRAINED_METHODS,
+)
 from pathlens.data.download import ensure_biosnap_tsv
 from pathlens.data.prepare import prepare_biosnap_dataset
 from pathlens.data.processed import ProcessedSplit, load_processed
@@ -50,6 +56,8 @@ def run_stage(
         strict_identity=strict_identity,
     )
     split = load_processed(processed, allow_test=False)
+    run_dir = Path(output_root or root / "runs" / CAMPAIGN_ID) / method_id / stage
+    run_dir.mkdir(parents=True, exist_ok=True)
 
     if method_id in HEURISTIC_METHODS:
         if stage == "train":
@@ -60,14 +68,20 @@ def run_stage(
             device=resolved_device,
             full=stage == "eval",
         )
+    elif method_id in TRAINED_METHODS:
+        payload = _run_trained(
+            method_id,
+            split,
+            config,
+            device=resolved_device,
+            stage=stage,
+            run_dir=run_dir,
+        )
     else:
         raise NotImplementedError(
-            f"{method_id} has no trainer in this slice. Run a heuristic first "
-            f"({', '.join(sorted(HEURISTIC_METHODS))})."
+            f"{method_id} has no trainer in this slice. Implemented trainers: "
+            f"{', '.join(sorted(TRAINED_METHODS))}."
         )
-
-    run_dir = Path(output_root or root / "runs" / CAMPAIGN_ID) / method_id / stage
-    run_dir.mkdir(parents=True, exist_ok=True)
     result = {
         "method": method_id,
         "stage": stage,
@@ -115,6 +129,28 @@ def ensure_processed(
     print(f"[pathlens] Preparing processed split at {processed}", flush=True)
     prepare_biosnap_dataset(source, processed, strict_identity=strict_identity)
     return processed
+
+
+def _run_trained(
+    method_id: str,
+    split: ProcessedSplit,
+    config: dict[str, Any],
+    *,
+    device: str,
+    stage: str,
+    run_dir: Path,
+) -> dict[str, Any]:
+    if method_id == "skipgnn":
+        from pathlens.training.skipgnn import run_skipgnn
+
+        return run_skipgnn(
+            split,
+            config,
+            device=device,
+            stage=stage,
+            run_dir=run_dir,
+        )
+    raise NotImplementedError(f"{method_id} has no trainer in this slice")
 
 
 def _run_heuristic(

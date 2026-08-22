@@ -33,6 +33,7 @@ def _prepared(tmp_path: Path) -> Path:
             dtype=np.int64,
         ),
         train_positive=np.asarray([[3, 0]], dtype=np.int64),
+        train_uniform=np.asarray([[0, 3]], dtype=np.int64),
         validation_positive=np.asarray([[1, 1]], dtype=np.int64),
         validation_uniform=np.asarray([[2, 0]], dtype=np.int64),
         validation_hard=np.asarray([[2, 0]], dtype=np.int64),
@@ -97,11 +98,70 @@ def test_heuristic_eval_includes_curves(tmp_path: Path) -> None:
     assert "test" not in result
 
 
-def test_trained_methods_are_not_implemented_yet(tmp_path: Path) -> None:
+def test_skipgnn_without_torch_explains_the_train_extra(tmp_path: Path) -> None:
+    import importlib.util
+
+    if importlib.util.find_spec("torch") is not None:
+        pytest.skip("torch is installed")
     processed = _prepared(tmp_path)
-    with pytest.raises(NotImplementedError, match="heuristic"):
+    with pytest.raises(RuntimeError, match="PyTorch"):
         run_stage(
             "skipgnn",
+            "smoke",
+            device="cpu",
+            processed_dir=processed,
+            output_root=tmp_path / "runs",
+            download=False,
+            strict_identity=False,
+            write_archive=False,
+        )
+
+
+def test_skipgnn_smoke_writes_metrics_and_skips_test(tmp_path: Path) -> None:
+    pytest.importorskip("torch")
+    processed = _prepared(tmp_path)
+    result = run_stage(
+        "skipgnn",
+        "smoke",
+        device="cpu",
+        processed_dir=processed,
+        output_root=tmp_path / "runs",
+        download=False,
+        strict_identity=False,
+        write_archive=False,
+    )
+    assert Path(result["output_dir"], "metrics.json").is_file()
+    assert "mrr" in result["filtered_ranking"]
+    assert "curves" not in result["classification"]["hard"]
+    assert "test" not in result
+    assert result["training"]["epochs"] == 2
+    assert result["training"]["selection"] == "validation_auroc_1to1"
+
+
+def test_skipgnn_eval_includes_curves_and_checkpoint(tmp_path: Path) -> None:
+    pytest.importorskip("torch")
+    processed = _prepared(tmp_path)
+    result = run_stage(
+        "skipgnn",
+        "eval",
+        device="cpu",
+        processed_dir=processed,
+        output_root=tmp_path / "runs",
+        download=False,
+        strict_identity=False,
+        write_archive=False,
+    )
+    assert "curves" in result["classification"]["hard"]
+    assert "degree_slices" in result["classification"]["hard"]
+    assert "test" not in result
+    assert Path(result["checkpoint"]).is_file()
+
+
+def test_gcn_trainer_is_not_implemented_yet(tmp_path: Path) -> None:
+    processed = _prepared(tmp_path)
+    with pytest.raises(NotImplementedError, match="no trainer"):
+        run_stage(
+            "gcn",
             "smoke",
             device="cpu",
             processed_dir=processed,

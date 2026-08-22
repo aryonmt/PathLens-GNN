@@ -118,14 +118,14 @@ def test_kaggle_drop_layout_exists() -> None:
         assert f"`{name}`" in figures_readme
 
 
-def test_notebook_defaults_to_resource_allocation_eval() -> None:
+def test_notebook_defaults_to_skipgnn_eval() -> None:
     import json
 
     notebook = json.loads(
         (REPO_ROOT / "kaggle" / "pathlens_training.ipynb").read_text(encoding="utf-8")
     )
     source = "".join(notebook["cells"][1]["source"])
-    assert 'METHOD = "resource_allocation"' in source
+    assert 'METHOD = "skipgnn"' in source
     assert 'STAGE = "eval"' in source
     assert 'FINAL_TEST_TOKEN = ""' in source
     assert "OPEN_SEALED_TEST_ONCE" not in source

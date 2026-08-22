@@ -20,4 +20,4 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 
 Status values: `not_started`, `import_pending`, `running`, `done`, `deferred`.
 
-Imported cards are validation-only from `pathlens-stage-output-v2-report.zip`. Weights stay local and gitignored. `binary_skipgnn` from that ZIP is **not** the official `skipgnn` run. `resource_allocation` is the current validation MRR leader. PathLens siblings stay on the board as an ablation ladder, not as extra systems to beat.
+Imported cards are validation-only from `pathlens-stage-output-v2-report.zip`. Weights stay local and gitignored. `binary_skipgnn` from that ZIP is **not** the official `skipgnn` run. The official SkipGNN trainer is in this repo (`legacy1` algebra, repaired data/eval bugs); the card stays `not_started` until the Kaggle eval is filed. `resource_allocation` is the current validation MRR leader. PathLens siblings stay on the board as an ablation ladder, not as extra systems to beat.

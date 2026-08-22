@@ -1,18 +1,18 @@
 # Kaggle
 
 One notebook: `pathlens_training.ipynb`. Set `METHOD` to a folder name under
-`methods/`. The committed default is `resource_allocation` with `STAGE=eval` so Save &
-Run All completes the heuristic validation card and does **not** open the test.
-`STAGE=final` is refused until freeze.
+`methods/`. The committed default is `skipgnn` with `STAGE=eval` so Save &
+Run All trains official SkipGNN and writes the validation card. It does **not**
+open the test. `STAGE=final` is refused until freeze.
 
 Internet must be on so the kernel can clone the branch **from GitHub** and
 download BioSNAP. Push `research/ranking-loss` before you run.
 
-| Stage | Heuristic (`degree`, `resource_allocation`, `three_hop`) | Trained methods |
+| Stage | Heuristic (`degree`, `resource_allocation`, `three_hop`) | `skipgnn` |
 |---|---|---|
-| `smoke` | GPU score matrix, validation MRR + AUPRC | not implemented yet |
-| `train` | refused | not implemented yet |
-| `eval` | full validation suite (curves, slices, bootstrap) | not implemented yet |
+| `smoke` | GPU score matrix, validation MRR + AUPRC | 2-epoch train + validation MRR/AUPRC |
+| `train` | refused | full train, checkpoint, validation metrics |
+| `eval` | full validation suite (curves, slices, bootstrap) | full train + full validation suite |
 | `final` | refused; v2 test stays sealed | refused |
 
 Imported PathLens cards live under `runs/` from a local `import-v2`. Do not retrain them on Kaggle. The last notebook cell plots every method that has `eval/`, `imported/`, or `smoke/` metrics and rebuilds `pathlens-stage-output.zip` so the PNGs are inside that archive.
@@ -43,19 +43,18 @@ File the download using [`runs/README.md`](../runs/README.md): raw ZIP under
 `runs/biosnap-dti-v2/figures/`. Do not commit `outputs/` dumps or
 `pathlens-stage-output*.zip`.
 
-## Operator: `resource_allocation` eval
+## Operator: `skipgnn` eval
 
 1. Confirm the local branch is committed and pushed to `origin/research/ranking-loss`.
 2. New kernel. GPU T4. Internet on. One method per session.
 3. Use `kaggle/pathlens_training.ipynb`. Defaults:
-   `METHOD="resource_allocation"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
+   `METHOD="skipgnn"`, `STAGE="eval"`, `DEVICE="cuda:0"`,
    `FINAL_TEST_TOKEN=""`.
-4. Save & Run All. Log should show `device=cuda:0`. This is the same-type RA/AA
-   walk **without** the extra `1/deg(d')` of `three_hop`. Compare MRR to
-   `three_hop` (~0.455) and `degree` (~0.134).
+4. Save & Run All. Log should show `device=cuda:0` and `[skipgnn] epoch=...`.
+   This is the official Huang encoder, not the imported `binary_skipgnn` overlay.
 5. Download `/kaggle/working/pathlens-stage-output.zip` — it contains `metrics.json`
    and `figures/`. File them per [`runs/README.md`](../runs/README.md).
 6. Do not set `STAGE=final`.
 
-After `metrics.json` is in `runs/biosnap-dti-v2/resource_allocation/eval/`, flip
-`docs/STATUS.md` in the same change. Then train `skipgnn`.
+After `metrics.json` is in `runs/biosnap-dti-v2/skipgnn/eval/`, flip
+`docs/STATUS.md` in the same change. Then train `gcn`.

@@ -12,6 +12,7 @@ VALIDATION_KEYS = (
     "all_positive",
     "context",
     "train_positive",
+    "train_uniform",
     "validation_positive",
     "validation_uniform",
     "validation_hard",
@@ -32,6 +33,7 @@ class ProcessedSplit:
     all_positive: NDArray[np.int64]
     context: NDArray[np.int64]
     train_positive: NDArray[np.int64]
+    train_uniform: NDArray[np.int64]
     validation_positive: NDArray[np.int64]
     validation_uniform: NDArray[np.int64]
     validation_hard: NDArray[np.int64]
@@ -63,6 +65,7 @@ def load_processed(processed_dir: str | Path, *, allow_test: bool = False) -> Pr
         all_positive=loaded["all_positive"],
         context=loaded["context"],
         train_positive=loaded["train_positive"],
+        train_uniform=loaded["train_uniform"],
         validation_positive=loaded["validation_positive"],
         validation_uniform=loaded["validation_uniform"],
         validation_hard=loaded["validation_hard"],
