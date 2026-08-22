@@ -15,7 +15,7 @@ download BioSNAP. Push `research/ranking-loss` before you run.
 | `eval` | full validation suite (curves, slices, bootstrap) | not implemented yet |
 | `final` | refused; v2 test stays sealed | refused |
 
-Imported PathLens cards live under `runs/` from a local `import-v2`. Do not retrain them on Kaggle. The last notebook cell plots every method that has `eval/`, `imported/`, or `smoke/` metrics.
+Imported PathLens cards live under `runs/` from a local `import-v2`. Do not retrain them on Kaggle. The last notebook cell plots every method that has `eval/`, `imported/`, or `smoke/` metrics and rebuilds `pathlens-stage-output.zip` so the PNGs are inside that archive.
 
 Use one GPU process per session for now. Do not DataParallel.
 
@@ -51,8 +51,8 @@ File the download using [`runs/README.md`](../runs/README.md): raw ZIP under
    `METHOD="degree"`, `STAGE="eval"`, `DEVICE="cuda:0"`, `FINAL_TEST_TOKEN=""`.
 4. Save & Run All. Log should show `device=cuda:0`. Compare MRR to `three_hop`
    (~0.455); degree is the popularity baseline, not the ranking leader.
-5. File `/kaggle/working/pathlens-stage-output.zip` and `/kaggle/working/figures/`
-   per [`runs/README.md`](../runs/README.md).
+5. Download `/kaggle/working/pathlens-stage-output.zip` — it contains `metrics.json`
+   and `figures/`. File them per [`runs/README.md`](../runs/README.md).
 6. Do not set `STAGE=final`.
 
 After `metrics.json` is in `runs/biosnap-dti-v2/degree/eval/`, flip

@@ -84,7 +84,7 @@ def run_stage(
     archive = None
     if write_archive:
         archive = Path(archive_path) if archive_path is not None else _default_archive_path(root)
-        _write_zip(run_dir, archive)
+        archive_run_dir(run_dir, archive)
     result["output_dir"] = str(run_dir)
     result["archive"] = None if archive is None else str(archive)
     print(
@@ -145,11 +145,14 @@ def _default_archive_path(repo_root: Path) -> Path:
     return repo_root / "pathlens-stage-output.zip"
 
 
-def _write_zip(run_dir: Path, destination: Path) -> None:
+def archive_run_dir(run_dir: str | Path, destination: str | Path) -> Path:
+    run_dir = Path(run_dir)
+    destination = Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
     if destination.exists():
         destination.unlink()
     shutil.make_archive(str(destination.with_suffix("")), "zip", root_dir=run_dir)
+    return destination
 
 
 def _json_default(value: object) -> object:

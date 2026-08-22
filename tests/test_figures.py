@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import json
+import zipfile
 from pathlib import Path
 
-from pathlens.evaluation.figures import FIGURE_NAMES, load_validation_report, synthetic_report
+from pathlens.evaluation.figures import (
+    FIGURE_NAMES,
+    copy_figure_files,
+    load_validation_report,
+    synthetic_report,
+)
+from pathlens.runtime.runner import archive_run_dir
 
 
 def test_figure_catalog_is_locked() -> None:
@@ -47,3 +54,18 @@ def test_load_runs_directory_prefers_eval_over_imported(tmp_path: Path) -> None:
     assert set(report["models"]) == {"one_hop", "three_hop"}
     assert report["models"]["three_hop"]["filtered_ranking"]["mrr"] == 0.45
     assert report["models"]["one_hop"]["filtered_ranking"]["mrr"] == 0.10
+
+
+def test_stage_archive_includes_copied_figures(tmp_path: Path) -> None:
+    png = tmp_path / "pr_hard.png"
+    png.write_bytes(b"png")
+    run_dir = tmp_path / "eval"
+    run_dir.mkdir()
+    (run_dir / "metrics.json").write_text("{}", encoding="utf-8")
+    copied = copy_figure_files([png], run_dir / "figures")
+    archive = archive_run_dir(run_dir, tmp_path / "pathlens-stage-output.zip")
+    with zipfile.ZipFile(archive) as bundle:
+        names = {name.replace("\\", "/") for name in bundle.namelist()}
+    assert copied[0] == run_dir / "figures" / "pr_hard.png"
+    assert "metrics.json" in names
+    assert "figures/pr_hard.png" in names

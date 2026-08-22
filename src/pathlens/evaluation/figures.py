@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 from typing import Any, cast
 
@@ -71,6 +72,16 @@ def write_validation_figures(report: dict[str, Any], output: Path) -> list[Path]
         _degree_slices(plt, models, output / "degree_slices_hard.png"),
     ]
     return written
+
+
+def copy_figure_files(paths: list[Path], destination: Path) -> list[Path]:
+    destination.mkdir(parents=True, exist_ok=True)
+    copied: list[Path] = []
+    for path in paths:
+        target = destination / path.name
+        shutil.copy2(path, target)
+        copied.append(target)
+    return copied
 
 
 def _load_runs_directory(root: Path) -> dict[str, Any]:
