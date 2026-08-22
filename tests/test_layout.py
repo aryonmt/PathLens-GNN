@@ -66,3 +66,6 @@ def test_notebook_defaults_to_three_hop_eval() -> None:
     assert 'STAGE = "final"' not in source
     figures_source = "".join(notebook["cells"][4]["source"])
     assert "write_validation_figures" in figures_source
+    checkout = "".join(notebook["cells"][2]["source"])
+    assert 'repository_source = str(REPO / "src")' in checkout
+    assert "sys.path.insert(0, repository_source)" in checkout
