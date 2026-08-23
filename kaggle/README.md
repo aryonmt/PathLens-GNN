@@ -4,7 +4,7 @@ One notebook: `pathlens_training.ipynb`. Default `SUITE=delivery`, `STAGE=final`
 Tesla T4. One Save Version clones GitHub, writes EDA, scores every delivery
 method on the sealed test, and rebuilds figures.
 
-Internet must be on. Push `research/ranking-loss` before you run.
+Internet must be on. Push `main` before you run.
 
 | Stage | Heuristic / blend / imported PathLens | `skipgnn` / `gcn` / `graphsage` / `residual_three_hop` |
 |---|---|---|

@@ -55,4 +55,4 @@ family checkpoints are already in the repo under
 `runs/biosnap-dti-v2/<method>/imported/checkpoint.pt`.
 
 Training, EDA figures, and `STAGE=final` run on Kaggle GPU (Tesla T4). Push
-`research/ranking-loss` first. See [`kaggle/README.md`](kaggle/README.md).
+`main` first. See [`kaggle/README.md`](kaggle/README.md).

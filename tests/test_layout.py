@@ -295,7 +295,7 @@ def test_notebook_defaults_to_delivery_final() -> None:
     assert 'SUITE = "delivery"' in source
     assert 'STAGE = "final"' in source
     assert 'FINAL_TEST_TOKEN = "OPEN_SEALED_TEST_ONCE"' in source
-    assert 'DEVICE = "cuda:0"' in source
+    assert 'GIT_REF = "main"' in source
     joined = "\n".join("".join(cell["source"]) for cell in notebook["cells"])
     assert "write_delivery_figures" in joined
     assert "DELIVERY_METHODS" in joined

@@ -27,7 +27,7 @@ def resolve_pathlens_checkpoint(repo_root: str | Path | None = None) -> Path:
         raise FileNotFoundError(
             "Frozen PathLens checkpoint not found at "
             "runs/biosnap-dti-v2/pathlens_ranking/imported/checkpoint.pt. "
-            "Clone research/ranking-loss or run import-v2 from the v2 report ZIP."
+            "Clone main or run import-v2 from the v2 report ZIP."
         )
     import_v2_report(archive, root / "runs" / "biosnap-dti-v2", copy_weights=True)
     if not imported.is_file():
