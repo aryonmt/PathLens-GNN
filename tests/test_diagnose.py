@@ -78,6 +78,22 @@ def test_diagnostic_train_is_refused(tmp_path: Path) -> None:
         )
 
 
+def test_diagnostic_final_is_refused(tmp_path: Path) -> None:
+    processed = _prepared(tmp_path)
+    with pytest.raises(ValueError, match="validation-only"):
+        run_stage(
+            "ranking_diagnostics",
+            "final",
+            device="cpu",
+            processed_dir=processed,
+            output_root=tmp_path / "runs",
+            download=False,
+            strict_identity=False,
+            write_archive=False,
+            final_test_token="OPEN_SEALED_TEST_ONCE",
+        )
+
+
 def test_visible_filter_is_context_train_validation_only(tmp_path: Path) -> None:
     from pathlens.data.processed import load_processed
     from pathlens.runtime.diagnose import visible_positive_pairs

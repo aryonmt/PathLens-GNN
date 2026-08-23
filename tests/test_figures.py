@@ -4,6 +4,7 @@ import json
 import zipfile
 from pathlib import Path
 
+from pathlens.evaluation.catalog import comparison_models
 from pathlens.evaluation.figures import (
     FIGURE_NAMES,
     copy_figure_files,
@@ -54,6 +55,9 @@ def test_load_runs_directory_prefers_eval_over_imported(tmp_path: Path) -> None:
     assert set(report["models"]) == {"one_hop", "three_hop"}
     assert report["models"]["three_hop"]["filtered_ranking"]["mrr"] == 0.45
     assert report["models"]["one_hop"]["filtered_ranking"]["mrr"] == 0.10
+    compared = comparison_models(report["models"])
+    assert "one_hop" not in compared
+    assert "three_hop" in compared
 
 
 def test_stage_archive_includes_copied_figures(tmp_path: Path) -> None:

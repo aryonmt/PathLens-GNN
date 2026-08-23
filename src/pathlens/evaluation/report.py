@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -19,6 +19,9 @@ from pathlens.evaluation.slices import degree_slices
 from pathlens.graph.scoring import lookup_pairs
 from pathlens.runtime.device import as_numpy
 
+SplitName = Literal["validation", "test"]
+FULL_STAGES = frozenset({"eval", "final"})
+
 
 def evaluate_score_matrix(
     scores: Any,
@@ -27,32 +30,32 @@ def evaluate_score_matrix(
     include_curves: bool = True,
     include_bootstrap: bool = True,
     include_slices: bool = True,
+    split_name: SplitName = "validation",
 ) -> dict[str, Any]:
     matrix = as_numpy(scores).astype(np.float64, copy=False)
+    positives, hard_negatives, uniform_negatives = _query_banks(processed, split_name)
     known = known_proteins_by_drug(processed.all_positive)
     ranking = filtered_per_drug_ranking_from_scores(
-        processed.validation_positive,
+        positives,
         scores=matrix,
         known_by_drug=known,
     )
     hard = _bank_report(
         matrix,
-        processed.validation_positive,
-        processed.validation_hard,
+        positives,
+        hard_negatives,
         include_curves=include_curves,
         include_bootstrap=include_bootstrap,
     )
     uniform = _bank_report(
         matrix,
-        processed.validation_positive,
-        processed.validation_uniform,
+        positives,
+        uniform_negatives,
         include_curves=include_curves,
         include_bootstrap=include_bootstrap,
     )
     if include_slices:
-        pairs, labels, logits = _bank_arrays(
-            matrix, processed.validation_positive, processed.validation_hard
-        )
+        pairs, labels, logits = _bank_arrays(matrix, positives, hard_negatives)
         drug_degree = np.bincount(processed.context[:, 0], minlength=processed.num_drugs)
         protein_degree = np.bincount(processed.context[:, 1], minlength=processed.num_proteins)
         hard["degree_slices"] = degree_slices(
@@ -64,9 +67,41 @@ def evaluate_score_matrix(
             threshold=float(hard["threshold"]),
         )
     return {
+        "split": split_name,
         "filtered_ranking": ranking.to_dict(),
         "classification": {"hard": hard, "uniform": uniform},
     }
+
+
+def evaluate_for_stage(scores: Any, processed: ProcessedSplit, stage: str) -> dict[str, Any]:
+    full = stage in FULL_STAGES
+    kwargs = {
+        "include_curves": full,
+        "include_bootstrap": full,
+        "include_slices": full,
+    }
+    payload = evaluate_score_matrix(scores, processed, split_name="validation", **kwargs)
+    if stage == "final":
+        payload["test"] = evaluate_score_matrix(scores, processed, split_name="test", **kwargs)
+    return payload
+
+
+def _query_banks(
+    processed: ProcessedSplit, split_name: SplitName
+) -> tuple[NDArray[np.int64], NDArray[np.int64], NDArray[np.int64]]:
+    if split_name == "validation":
+        return (
+            processed.validation_positive,
+            processed.validation_hard,
+            processed.validation_uniform,
+        )
+    if split_name == "test":
+        return (
+            processed.test_array("test_positive"),
+            processed.test_array("test_hard"),
+            processed.test_array("test_uniform"),
+        )
+    raise ValueError(f"Unknown split {split_name!r}")
 
 
 def _bank_report(

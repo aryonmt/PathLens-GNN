@@ -9,7 +9,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from pathlens import REPO_ROOT
-from pathlens.constants import V2_FREEZE_CHECKPOINT_SHA256
+from pathlens.constants import CAMPAIGN_ID, IMPORT_METHODS, V2_FREEZE_CHECKPOINT_SHA256
 from pathlens.data.processed import ProcessedSplit
 from pathlens.graph.scoring import build_adjacency, score_three_hop
 from pathlens.importing.campaign_v2 import DEFAULT_V2_REPORT_ZIP, import_v2_report
@@ -55,6 +55,33 @@ def find_v2_report(repo_root: str | Path | None = None) -> Path | None:
     return None
 
 
+def score_imported_pathlens(
+    method_id: str,
+    split: ProcessedSplit,
+    *,
+    device: str,
+    repo_root: str | Path | None = None,
+    checkpoint: str | Path | None = None,
+) -> NDArray[np.float64]:
+    if method_id not in IMPORT_METHODS:
+        raise KeyError(f"{method_id} is not an imported PathLens card")
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    path = (
+        Path(checkpoint)
+        if checkpoint is not None
+        else root / "runs" / CAMPAIGN_ID / method_id / "imported" / "checkpoint.pt"
+    )
+    if not path.is_file():
+        raise FileNotFoundError(f"Imported checkpoint missing: {path}")
+    return score_pathlens_checkpoint(
+        split,
+        path,
+        device=device,
+        repo_root=root,
+        require_freeze_sha=method_id == "pathlens_ranking",
+    )
+
+
 def score_frozen_pathlens(
     split: ProcessedSplit,
     *,
@@ -62,9 +89,31 @@ def score_frozen_pathlens(
     checkpoint: str | Path | None = None,
     repo_root: str | Path | None = None,
 ) -> NDArray[np.float64]:
-    torch = _require_torch()
     path = Path(checkpoint) if checkpoint is not None else resolve_pathlens_checkpoint(repo_root)
+    return score_pathlens_checkpoint(
+        split,
+        path,
+        device=device,
+        repo_root=repo_root,
+        require_freeze_sha=True,
+    )
+
+
+def score_pathlens_checkpoint(
+    split: ProcessedSplit,
+    checkpoint: str | Path,
+    *,
+    device: str,
+    repo_root: str | Path | None = None,
+    require_freeze_sha: bool = False,
+) -> NDArray[np.float64]:
+    torch = _require_torch()
+    path = Path(checkpoint)
+    if require_freeze_sha:
+        _assert_freeze_sha(path)
     _ensure_legacy2_path(repo_root)
+    from dataclasses import fields
+
     from pathlens_gnn.graph.index import BipartiteIndex
     from pathlens_gnn.model.pathlens import PathLensConfig, PathLensGNN
     from pathlens_gnn.training.scoring import DevicePairFeatures, score_all_proteins
@@ -73,7 +122,8 @@ def score_frozen_pathlens(
     raw_model = dict(payload["training_config"]["model"])
     if "enabled_channels" in raw_model:
         raw_model["enabled_channels"] = tuple(raw_model["enabled_channels"])
-    config = PathLensConfig(**raw_model)
+    allowed = {item.name for item in fields(PathLensConfig)}
+    config = PathLensConfig(**{key: value for key, value in raw_model.items() if key in allowed})
     index = BipartiteIndex(split.num_drugs, split.num_proteins, split.context)
     drug_mass = np.asarray(
         [index.projection_mass_drug(drug) for drug in range(split.num_drugs)],

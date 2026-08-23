@@ -1,6 +1,7 @@
 # Method status — `biosnap-dti-v2`
 
-Split seed 41. Test sealed. Update this table in the same change that finishes a method.
+Split seed 41. Negative freeze recorded. `STAGE=final` opens test once.
+Update this table in the same change that finishes a method.
 
 | Method | Kind | Loss | Train here | Status | Last run |
 |---|---|---|---|---|---|
@@ -18,7 +19,7 @@ Split seed 41. Test sealed. Update this table in the same change that finishes a
 | `blend_pathlens_three_hop` | combine | none | no | done | eval T4 `73d5a2a` |
 | `rrf_pathlens_three_hop` | combine | none | no | done | eval T4 `73d5a2a` |
 | `residual_three_hop` | model | sampled softmax | yes | done | eval T4 `a5506bb` |
-| `ranking_diagnostics` | diagnostic | none | no | not_started | — |
+| `ranking_diagnostics` | diagnostic | none | no | done | eval T4 `90202e6` |
 | `gat` | model | BCE 1:1 | if hours remain | deferred | — |
 | `nbfnet` | model | TBD | if hours remain | deferred | — |
 
@@ -29,8 +30,8 @@ checkpoints live in-repo under `runs/biosnap-dti-v2/<method>/imported/checkpoint
 (BSD-3-Clause). Official `skipgnn` (`56970fe`), `gcn` (`9fa9913`), and
 `graphsage` (`4138751`) are in-repo GPU cards, not the v2 `binary_skipgnn`
 overlay. GraphSAGE is Hamilton mean-SAGE (Huang et al. did not report it).
-`resource_allocation` remains the validation MRR leader. Late fusion selected
-`α=1` (pure z-scored 3-hop). RRF raised hard AUPRC and lowered MRR.
-`residual_three_hop` trained 18 epochs on Tesla T4 (best epoch 10) and lost
-filtered MRR to frozen 3-hop. Next GPU card is `ranking_diagnostics` (tie-break
-and filter audit). `gat` and `nbfnet` stay deferred. Test stays sealed.
+`resource_allocation` remains the filed (`strict_gt`) validation MRR leader.
+The tie audit is filed: average-rank MRR puts `pathlens_ranking` (0.375)
+slightly above `three_hop` (0.362) and RA (0.352). Freeze rule unchanged.
+`gat` and `nbfnet` stay deferred. Test opens once via `STAGE=final`.
+Nested PathLens hops stay in the family ladder, not in head-to-head plots.

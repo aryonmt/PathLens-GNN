@@ -9,29 +9,32 @@ codebase. It is not a product or a clinical tool.
 
 | Path | What it is |
 |---|---|
+| [`docs/delivery/README.md`](docs/delivery/README.md) | Reading order for the university report |
+| [`docs/research/PAPER_CRITIQUE.md`](docs/research/PAPER_CRITIQUE.md) | Critique of Huang et al. SkipGNN |
 | [`docs/STATUS.md`](docs/STATUS.md) | Scoreboard: every method, status, last run |
 | [`methods/<id>/`](methods/) | Definition of one heuristic or model |
 | [`runs/biosnap-dti-v2/`](runs/biosnap-dti-v2/) | Artifacts of actual runs ([`runs/README.md`](runs/README.md)) |
 | [`src/pathlens/`](src/pathlens/) | Shared data, eval, and trainers |
-| [`kaggle/`](kaggle/) | One notebook; set `METHOD` |
+| [`kaggle/`](kaggle/) | One notebook; `SUITE=delivery` opens test once |
 | [`legacy1/`](legacy1/) | Original SkipGNN clone (gitignored) |
 | [`legacy2/`](legacy2/) | Frozen PathLens campaigns v1–v2 |
 
-Campaign `biosnap-dti-v2` uses split seed 41. The test set is sealed.
+Campaign `biosnap-dti-v2` uses split seed 41. Validation selected a **negative
+freeze** (no learned model beat 3-hop and SkipGNN on MRR). `STAGE=final`
+opens the test once for confirmation.
 
-## Phase 1 methods
+## Methods
 
 Heuristics: `degree`, `resource_allocation`, `three_hop`.
 
-Train here (done): `skipgnn` (BCE), `gcn`, `graphsage`, `residual_three_hop`.
-Filed mixes: `blend_pathlens_three_hop`, `rrf_pathlens_three_hop`.
-Diagnostic (next Kaggle): `ranking_diagnostics`.
-Optional: `gat`, `nbfnet`.
+Train here: `skipgnn` (BCE), `gcn`, `graphsage`, `residual_three_hop`.
+Mixes: `blend_pathlens_three_hop`, `rrf_pathlens_three_hop`.
+Diagnostic: `ranking_diagnostics` (validation only).
+Deferred: `gat`, `nbfnet`.
 
-Import, do not retrain (done): `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`, `pathlens_ranking`.
-
-Default loss is BCE 1:1. Ranking-loss cards: imported `pathlens_ranking` and
-`residual_three_hop`.
+Import, do not retrain: `one_hop`, `s1_s2`, `s1_s2_s3_fixed`, `pathlens_bce`,
+`pathlens_ranking`. Nested hops are one architecture; head-to-head plots use
+only the BCE and ranking heads.
 
 ## Quick start
 
@@ -49,12 +52,7 @@ python -m pathlens import-v2
 
 Import reads a local v2 report ZIP if you still have one. The locked PathLens
 family checkpoints are already in the repo under
-`runs/biosnap-dti-v2/<method>/imported/checkpoint.pt`. It does not open the test.
+`runs/biosnap-dti-v2/<method>/imported/checkpoint.pt`.
 
-Heuristic scoring and training run on Kaggle GPU (Tesla T4), one method at a time.
-The notebook default is `ranking_diagnostics` / `STAGE=eval`. Push the branch
-before the kernel clones GitHub:
-
-```bash
-python -m pathlens run --method ranking_diagnostics --stage eval --device cuda:0
-```
+Training, EDA figures, and `STAGE=final` run on Kaggle GPU (Tesla T4). Push
+`research/ranking-loss` first. See [`kaggle/README.md`](kaggle/README.md).

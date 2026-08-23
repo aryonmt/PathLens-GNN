@@ -13,13 +13,14 @@ from pathlens.constants import (
     DIAGNOSTIC_METHODS,
     FINAL_TEST_TOKEN,
     HEURISTIC_METHODS,
+    IMPORT_METHODS,
     STAGES,
     TRAINED_METHODS,
 )
 from pathlens.data.download import ensure_biosnap_tsv
 from pathlens.data.prepare import prepare_biosnap_dataset
 from pathlens.data.processed import ProcessedSplit, load_processed
-from pathlens.evaluation.report import evaluate_score_matrix
+from pathlens.evaluation.report import evaluate_for_stage
 from pathlens.graph.scoring import build_adjacency, score_method
 from pathlens.runtime.config import load_method_config
 from pathlens.runtime.device import describe_device, resolve_device
@@ -45,8 +46,11 @@ def run_stage(
 ) -> dict[str, Any]:
     if stage not in STAGES:
         raise ValueError(f"Unknown stage {stage!r}. Expected one of {STAGES}")
-    if stage == "final":
-        raise PermissionError("final is disabled until freeze. The v2 test stays sealed.")
+    if stage == "final" and final_test_token != FINAL_TEST_TOKEN:
+        raise PermissionError(
+            "final requires FINAL_TEST_TOKEN=OPEN_SEALED_TEST_ONCE. "
+            "The v2 test opens at most once after the negative freeze."
+        )
     if final_test_token and final_test_token != FINAL_TEST_TOKEN:
         raise PermissionError("Invalid FINAL_TEST_TOKEN")
 
@@ -60,13 +64,15 @@ def run_stage(
         download=download,
         strict_identity=strict_identity,
     )
-    split = load_processed(processed, allow_test=False)
+    split = load_processed(processed, allow_test=stage == "final")
     run_dir = Path(output_root or root / "runs" / CAMPAIGN_ID) / method_id / stage
     run_dir.mkdir(parents=True, exist_ok=True)
 
     if method_id in COMBINE_METHODS:
         if stage == "train":
-            raise ValueError(f"{method_id} is a frozen-score mix; use STAGE=smoke or STAGE=eval")
+            raise ValueError(
+                f"{method_id} is a frozen-score mix; use STAGE=smoke, eval, or final"
+            )
         payload = _run_combine(
             method_id,
             split,
@@ -80,12 +86,25 @@ def run_stage(
         )
     elif method_id in HEURISTIC_METHODS:
         if stage == "train":
-            raise ValueError(f"{method_id} is a heuristic; use STAGE=smoke or STAGE=eval")
+            raise ValueError(f"{method_id} is a heuristic; use STAGE=smoke, eval, or final")
         payload = _run_heuristic(
             method_id,
             split,
             device=resolved_device,
-            full=stage == "eval",
+            stage=stage,
+        )
+    elif method_id in IMPORT_METHODS:
+        if stage == "train":
+            raise ValueError(
+                f"{method_id} is an imported checkpoint; use STAGE=smoke, eval, or final"
+            )
+        payload = _run_imported(
+            method_id,
+            split,
+            device=resolved_device,
+            stage=stage,
+            repo_root=root,
+            checkpoint=pathlens_checkpoint,
         )
     elif method_id in TRAINED_METHODS:
         payload = _run_trained(
@@ -215,6 +234,31 @@ def _run_trained(
     raise NotImplementedError(f"{method_id} has no trainer in this slice")
 
 
+def _run_imported(
+    method_id: str,
+    split: ProcessedSplit,
+    *,
+    device: str,
+    stage: str,
+    repo_root: Path,
+    checkpoint: str | Path | None,
+) -> dict[str, Any]:
+    from pathlens.runtime.pathlens_infer import score_imported_pathlens
+
+    started = time.perf_counter()
+    scores = score_imported_pathlens(
+        method_id,
+        split,
+        device=device,
+        repo_root=repo_root,
+        checkpoint=checkpoint,
+    )
+    payload = evaluate_for_stage(scores, split, stage)
+    payload["score_seconds"] = time.perf_counter() - started
+    payload["imported"] = True
+    return payload
+
+
 def _run_combine(
     method_id: str,
     split: ProcessedSplit,
@@ -267,18 +311,12 @@ def _run_heuristic(
     split: ProcessedSplit,
     *,
     device: str,
-    full: bool,
+    stage: str,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     adjacency = build_adjacency(split.num_drugs, split.num_proteins, split.context, device)
     scores = score_method(method_id, adjacency)
-    payload = evaluate_score_matrix(
-        scores,
-        split,
-        include_curves=full,
-        include_bootstrap=full,
-        include_slices=full,
-    )
+    payload = evaluate_for_stage(scores, split, stage)
     payload["score_seconds"] = time.perf_counter() - started
     return payload
 

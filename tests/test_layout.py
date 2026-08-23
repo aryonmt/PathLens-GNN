@@ -241,22 +241,66 @@ def test_residual_eval_card_is_filed() -> None:
     assert "done" in status.split("`residual_three_hop`")[1].split("\n")[0]
 
 
-def test_notebook_defaults_to_ranking_diagnostics_eval() -> None:
+def test_ranking_diagnostics_eval_card_is_filed() -> None:
+    import json
+
+    campaign = REPO_ROOT / "runs" / "biosnap-dti-v2"
+    payload = json.loads(
+        (campaign / "ranking_diagnostics" / "eval" / "metrics.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert payload["method"] == "ranking_diagnostics"
+    assert payload["stage"] == "eval"
+    assert payload["diagnostic"] is True
+    assert "test" not in payload
+    assert set(payload["methods"]) >= {
+        "degree",
+        "resource_allocation",
+        "three_hop",
+        "pathlens_ranking",
+    }
+    pathlens = payload["methods"]["pathlens_ranking"]["all_positive"]
+    three = payload["methods"]["three_hop"]["all_positive"]
+    assert pathlens["ties"]["fraction_in_tie"] == 0.0
+    assert three["ranking"]["average"]["mrr"] < three["ranking"]["strict_gt"]["mrr"]
+    assert (campaign / "ranking_diagnostics" / "eval" / "provenance.json").is_file()
+    assert (campaign / "ranking_diagnostics" / "eval" / "figures" / "mrr_tie_break.png").is_file()
+    status = (REPO_ROOT / "docs" / "STATUS.md").read_text(encoding="utf-8")
+    assert "| `ranking_diagnostics` |" in status
+    assert "done" in status.split("`ranking_diagnostics`")[1].split("\n")[0]
+
+
+def test_delivery_source_pack_exists() -> None:
+    docs = REPO_ROOT / "docs"
+    for relative in (
+        "delivery/README.md",
+        "research/PAPER_CRITIQUE.md",
+        "research/TECHNICAL_NARRATIVE.md",
+        "research/MODEL_CATALOG.md",
+        "research/EDA.md",
+        "research/FREEZE.md",
+    ):
+        assert (docs / relative).is_file(), relative
+    assert (REPO_ROOT / "runs" / "biosnap-dti-v2" / "figures" / "scoreboard.md").is_file()
+
+
+def test_notebook_defaults_to_delivery_final() -> None:
     import json
 
     notebook = json.loads(
         (REPO_ROOT / "kaggle" / "pathlens_training.ipynb").read_text(encoding="utf-8")
     )
     source = "".join(notebook["cells"][1]["source"])
-    assert 'METHOD = "ranking_diagnostics"' in source
-    assert 'STAGE = "eval"' in source
-    assert 'FINAL_TEST_TOKEN = ""' in source
-    assert "OPEN_SEALED_TEST_ONCE" not in source
-    assert 'STAGE = "final"' not in source
-    figures_source = "".join(notebook["cells"][4]["source"])
-    assert "write_validation_figures" in figures_source
-    assert "archive_run_dir" in figures_source
-    assert 'run_dir / "figures"' in figures_source
+    assert 'SUITE = "delivery"' in source
+    assert 'STAGE = "final"' in source
+    assert 'FINAL_TEST_TOKEN = "OPEN_SEALED_TEST_ONCE"' in source
+    assert 'DEVICE = "cuda:0"' in source
+    joined = "\n".join("".join(cell["source"]) for cell in notebook["cells"])
+    assert "write_delivery_figures" in joined
+    assert "DELIVERY_METHODS" in joined
+    assert "write_eda_figures" in joined
+    assert "archive_run_dir" in joined
     checkout = "".join(notebook["cells"][2]["source"])
     assert 'repository_source = str(REPO / "src")' in checkout
     assert "sys.path.insert(0, repository_source)" in checkout

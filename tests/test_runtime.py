@@ -64,9 +64,9 @@ def test_heuristic_smoke_writes_metrics_and_skips_test(tmp_path: Path) -> None:
     assert "test" not in result
 
 
-def test_final_stage_stays_sealed(tmp_path: Path) -> None:
+def test_final_stage_without_token_stays_sealed(tmp_path: Path) -> None:
     processed = _prepared(tmp_path)
-    with pytest.raises(PermissionError, match="sealed"):
+    with pytest.raises(PermissionError, match="FINAL_TEST_TOKEN"):
         run_stage(
             "three_hop",
             "final",
@@ -76,8 +76,27 @@ def test_final_stage_stays_sealed(tmp_path: Path) -> None:
             download=False,
             strict_identity=False,
             write_archive=False,
-            final_test_token="OPEN_SEALED_TEST_ONCE",
         )
+
+
+def test_final_heuristic_scores_test_once(tmp_path: Path) -> None:
+    processed = _prepared(tmp_path)
+    result = run_stage(
+        "three_hop",
+        "final",
+        device="cpu",
+        processed_dir=processed,
+        output_root=tmp_path / "runs",
+        download=False,
+        strict_identity=False,
+        write_archive=False,
+        final_test_token="OPEN_SEALED_TEST_ONCE",
+    )
+    assert "test" in result
+    assert "filtered_ranking" in result["test"]
+    assert result["test"]["split"] == "test"
+    assert result["split"] == "validation"
+    assert Path(result["output_dir"], "metrics.json").is_file()
 
 
 def test_heuristic_eval_includes_curves(tmp_path: Path) -> None:

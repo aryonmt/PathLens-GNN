@@ -11,7 +11,7 @@ from pathlens.evaluation.ranking import (
     filtered_per_drug_ranking_from_scores,
     known_proteins_by_drug,
 )
-from pathlens.evaluation.report import evaluate_score_matrix
+from pathlens.evaluation.report import evaluate_for_stage
 from pathlens.graph.scoring import build_adjacency, score_three_hop
 from pathlens.runtime.device import as_numpy
 from pathlens.training.ranking import sample_ranked_negatives, sampled_softmax_loss
@@ -116,14 +116,7 @@ def run_residual_three_hop(
     model.to(device)
     model.eval()
     scores = as_numpy(model.score_matrix(hop_tensor))
-    full = stage == "eval"
-    payload = evaluate_score_matrix(
-        scores,
-        split,
-        include_curves=full,
-        include_bootstrap=full,
-        include_slices=full,
-    )
+    payload = evaluate_for_stage(scores, split, stage)
     payload["score_seconds"] = time.perf_counter() - started
     payload["training"] = {
         "seed": hyper["seed"],

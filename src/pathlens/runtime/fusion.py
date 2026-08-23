@@ -11,7 +11,7 @@ from pathlens.evaluation.ranking import (
     filtered_per_drug_ranking_from_scores,
     known_proteins_by_drug,
 )
-from pathlens.evaluation.report import evaluate_score_matrix
+from pathlens.evaluation.report import evaluate_for_stage
 from pathlens.graph.combine import (
     BLEND_ALPHAS,
     blend_scores,
@@ -58,7 +58,6 @@ def combine_pathlens_three_hop(
         )
     )
     known = known_proteins_by_drug(split.all_positive)
-    full = stage == "eval"
     alpha, sweep = select_blend_alpha(
         hop,
         pathlens,
@@ -71,13 +70,7 @@ def combine_pathlens_three_hop(
     rrf = reciprocal_rank_fusion(hop, pathlens)
     mean_rank = mean_rank_scores(hop, pathlens)
 
-    blend_payload = evaluate_score_matrix(
-        blended,
-        split,
-        include_curves=full,
-        include_bootstrap=full,
-        include_slices=full,
-    )
+    blend_payload = evaluate_for_stage(blended, split, stage)
     blend_payload["combine"] = {
         "kind": "late_fusion",
         "left": "three_hop",
@@ -94,13 +87,7 @@ def combine_pathlens_three_hop(
         ).mrr,
     }
 
-    rrf_payload = evaluate_score_matrix(
-        rrf,
-        split,
-        include_curves=full,
-        include_bootstrap=full,
-        include_slices=full,
-    )
+    rrf_payload = evaluate_for_stage(rrf, split, stage)
     rrf_payload["combine"] = {
         "kind": "reciprocal_rank_fusion",
         "left": "three_hop",

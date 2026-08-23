@@ -1,0 +1,13 @@
+{
+  "method": "ranking_diagnostics",
+  "campaign": "biosnap-dti-v2",
+  "split_seed": 41,
+  "stage": "eval",
+  "retrain": false,
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "git_ref": "research/ranking-loss",
+  "git_sha": "90202e6",
+  "source_archive": "outputs/kaggle/ranking-diagnostics-eval/pathlens-stage-output.zip",
+  "source_archive_sha256": "2cbf5295b59ec70c6503b7d6315f15ab056746ee05cb9894b7090e10988828bb"
+}

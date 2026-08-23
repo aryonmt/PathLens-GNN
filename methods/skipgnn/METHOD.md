@@ -2,7 +2,7 @@
 
 - **Kind:** trained model
 - **Campaign:** `biosnap-dti-v2` (BioSNAP DTI, split seed 41)
-- **Test set:** sealed
+- **Test set:** one-shot STAGE=final after negative freeze
 - **Loss:** BCE 1:1
 - **Train in this repo:** yes
 - **Status:** done

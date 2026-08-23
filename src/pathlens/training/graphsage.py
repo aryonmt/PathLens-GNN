@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from pathlens.data.processed import ProcessedSplit
-from pathlens.evaluation.report import evaluate_score_matrix
+from pathlens.evaluation.report import evaluate_for_stage
 from pathlens.graph.skip import build_symmetric_adjacency, visible_training_edges
 from pathlens.runtime.device import as_numpy
 from pathlens.training.gcn import _gcn_validation_auroc
@@ -117,14 +117,7 @@ def run_graphsage(
             num_drugs=split.num_drugs,
             num_proteins=split.num_proteins,
         )
-    full = stage == "eval"
-    payload = evaluate_score_matrix(
-        as_numpy(scores),
-        split,
-        include_curves=full,
-        include_bootstrap=full,
-        include_slices=full,
-    )
+    payload = evaluate_for_stage(as_numpy(scores), split, stage)
     payload["score_seconds"] = time.perf_counter() - started
     payload["training"] = {
         "seed": hyper["seed"],

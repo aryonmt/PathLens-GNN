@@ -2,7 +2,7 @@
 
 - **Kind:** trained residual on a frozen heuristic
 - **Campaign:** `biosnap-dti-v2` (BioSNAP DTI, split seed 41)
-- **Test set:** sealed
+- **Test set:** one-shot STAGE=final after negative freeze
 - **Loss:** sampled softmax (64 negatives, 25% hard mix)
 - **Train in this repo:** yes
 - **Status:** done

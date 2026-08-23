@@ -14,4 +14,5 @@ URL:
 `https://snap.stanford.edu/biodata/datasets/10002/files/ChG-Miner_miner-chem-gene.tsv.gz`
 
 Campaign `biosnap-dti-v2` split seed: 41. The header row is not an edge. Kaggle
-downloads this file; the laptop does not.
+downloads this file; the laptop does not. See [`EDA.md`](EDA.md) for structure,
+degrees, and the 3-hop zero-mass fact.

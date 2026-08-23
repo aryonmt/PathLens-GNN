@@ -2,18 +2,18 @@
 
 - **Kind:** diagnostic (not a freeze candidate)
 - **Campaign:** `biosnap-dti-v2` (BioSNAP DTI, split seed 41)
-- **Test set:** sealed
+- **Test set:** validation only (not scored on test)
 - **Loss:** none
 - **Train in this repo:** no
-- **Status:** not_started
-- **Notes:** Wave-1 audit of the filed ranking metric. Rescores `degree`,
-  `resource_allocation`, `three_hop` on GPU, and on `STAGE=eval` also the
-  frozen `pathlens_ranking` checkpoint. Reports MRR under `strict_gt` (filed
-  default), `average` ties, and seeded `random` ties; zero-score / tie-group
-  stats; MRR by drug-degree tertile; and a `visible` filter
-  (`context ∪ train ∪ val`) versus `all_positive` (canonical edges, so test
-  positives are in the mask only — test arrays are never read). Does not
-  rewrite filed cards.
+- **Status:** done
+- **Notes:** Tesla T4 (`cuda:0`), 5.2s GPU. Rescored `degree`,
+  `resource_allocation`, `three_hop`, and frozen `pathlens_ranking`.
+  Filed freeze metric stays `strict_gt` + `all_positive`. Under average
+  ties, PathLens MRR 0.375 is above 3-hop 0.362 and RA 0.352. RA/3-hop
+  have score 0 on 28.6% of validation positives; PathLens has no ties.
+  The `visible` filter (no test in the mask) lowers every method.
+  Heuristics lead on low-degree drugs; PathLens leads on high-degree.
+  Does not rewrite filed cards.
 
 Runs belong in `runs/biosnap-dti-v2/ranking_diagnostics/eval/`.
 Update `docs/STATUS.md` in the same change that flips status to `done`.

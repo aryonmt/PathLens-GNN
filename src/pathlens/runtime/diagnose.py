@@ -35,6 +35,10 @@ def run_ranking_diagnostics(
 ) -> dict[str, Any]:
     if stage == "train":
         raise ValueError("ranking_diagnostics is a diagnostic; use STAGE=smoke or STAGE=eval")
+    if stage == "final":
+        raise ValueError(
+            "ranking_diagnostics is validation-only. Score methods with STAGE=final instead."
+        )
     started = time.perf_counter()
     include_pathlens = stage == "eval"
     adjacency = build_adjacency(split.num_drugs, split.num_proteins, split.context, device)

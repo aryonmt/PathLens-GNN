@@ -26,6 +26,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--raw", type=Path, default=None)
     run.add_argument("--processed", type=Path, default=None)
     run.add_argument("--no-download", action="store_true")
+    run.add_argument("--final-test-token", default="", help="Required for STAGE=final")
 
     imported = sub.add_parser(
         "import-v2",
@@ -55,5 +56,6 @@ def main(argv: list[str] | None = None) -> int:
         raw_path=args.raw,
         processed_dir=args.processed,
         download=not args.no_download,
+        final_test_token=args.final_test_token,
     )
     return 0

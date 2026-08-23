@@ -11,6 +11,7 @@ runs/biosnap-dti-v2/
   <method>/imported/       ← locked PathLens cards (metrics.json; weights gitignored)
   <method>/eval/           ← Kaggle STAGE=eval metrics.json (this is the method card)
   <method>/train/          ← Kaggle STAGE=train only for methods we train here
+  <method>/final/          ← Kaggle STAGE=final (validation + one-shot test)
 ```
 
 ## After a Kaggle session
@@ -20,4 +21,5 @@ runs/biosnap-dti-v2/
 3. Copy `figures/*.png` from the ZIP to `runs/biosnap-dti-v2/figures/`.
 4. Update `docs/STATUS.md` in the **same** change. Do not commit `*.pt` or the ZIP.
 
-`STAGE=final` is refused until freeze. Do not create a `test/` metrics folder yet.
+After `STAGE=final`, also copy `val_vs_test_mrr.png` and EDA PNGs. Do not
+reselect a winner from test numbers.

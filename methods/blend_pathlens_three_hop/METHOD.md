@@ -2,7 +2,7 @@
 
 - **Kind:** late fusion of frozen scores
 - **Campaign:** `biosnap-dti-v2` (BioSNAP DTI, split seed 41)
-- **Test set:** sealed
+- **Test set:** one-shot STAGE=final after negative freeze
 - **Loss:** none
 - **Train in this repo:** no
 - **Status:** done
